@@ -8,9 +8,13 @@
     tools:context="jorje196.com.github.brewmaster.MainBeerActivity">
 
     <TextView
+        android:id="@+id/top_aphorism"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:textAlignment="center"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="20sp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
