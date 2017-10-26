@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="str_obama">Обама с пивом</string>
+
     <string-array name="aphorisms">
         <item>Губит людей не пиво, губит людей его отсутствие!</item>
         <item>Лучше пузо от пива, чем горб от работы..</item>
