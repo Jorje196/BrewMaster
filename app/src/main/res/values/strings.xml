@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Пивовар</string>
+
+    <string name="action_settings">Настройки</string>
+    <string name="action_saving">Сохранить</string>
+    <string name="action_search">Поиск</string>
+    <string name="action_brew">Варки</string>
+    <string name="action_edit_brew">Редактировать</string>
+    <string name="action_new_brew">Создать</string>
 </resources>
