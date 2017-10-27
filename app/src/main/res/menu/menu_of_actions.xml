@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:id="@+id/action_search"
+        android:title="@string/action_search"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:orderInCategory="5"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_brew_list"
+        android:title="@string/action_brew_list"
+        android:icon="@drawable/ic_areometer_black_24dp"
+        android:orderInCategory="6"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_edit_brew"
+        android:title="@string/action_edit_brew"
+        android:icon="@drawable/ic_playlist_add_black_24dp"
+        android:orderInCategory="7"
+        android:showAsAction="ifRoom" />
+
     <item android:id="@+id/action_create_brew"
-        android:title="@string/action_brew"
+        android:title="@string/action_create_brew"
         android:icon="@drawable/ic_areometer_black_24dp"
         android:orderInCategory="10"
         android:showAsAction="ifRoom" />
