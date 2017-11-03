@@ -1,3 +1,9 @@
+package jorje196.com.github.brewmaster;
+
+import android.util.Log;
+
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
