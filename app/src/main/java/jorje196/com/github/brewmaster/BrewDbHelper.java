@@ -1,8 +1,10 @@
 package jorje196.com.github.brewmaster;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by User on 01.11.2017.
@@ -19,6 +21,7 @@ class BrewDbHelper extends SQLiteOpenHelper {
   public static final String TYPE_INT = "INTEGER";
   public static final String TYPE_TEXT = "TEXT";
   public static final String TYPE_REAL = "REAL";
+  public static final String _COM = ",";  // comma
 
   public static final String TABLE_BRANDS = "brands";
   public static final String COLUMN_BRANDS_ID = "_id";
@@ -30,8 +33,8 @@ class BrewDbHelper extends SQLiteOpenHelper {
 
   public static final String TABLE_VERIETIES = "verieties";
   public static final String COLUMN_VERIETIES_ID ="_id";
-  public static final String COLUMN_VERIETIES_BRAND = "brand";
-  public static final String COLUMN_VERIETIES_NAME = "name";
+  public static final String COLUMN_VERIETIES_BRAND_ID = "brand_id";
+  public static final String COLUMN_VERIETIES_NAME_ID = "name_id";
   public static final String COLUMN_VERIETIES_HREFIMG = "href_img";
   public static final String COLUMN_VERIETIES_BITTER = "bitter";
   public static final String COLUMN_VERIETIES_COLOR = "color";
@@ -41,21 +44,94 @@ class BrewDbHelper extends SQLiteOpenHelper {
 
 
 
-  // http://www.coopersbeer.ru/european-lager.jpg
-
-
   private Context dbContext;                      //  a) надо ли оно ?
 
   public BrewDbHelper(Context context) {
     super(context, DB_NAME, null, DB_VERSION);
     this.dbContext = context;                     // см a)
   }
-
+  public static String sqlString;
   @Override         // при первом запуске определяем DB
   public void onCreate(SQLiteDatabase db){
-    // опредеяем таблицу BRANDS
-    db.execSQL(CREATE_TABLE + TABLE_BRANDS +
-            "(" + _ID_IPKA + "," + COLUMN_BRANDS_BRAND + TYPE_INT + ")");
+
+
+      // опредеяем табл. BRANDS
+      db.execSQL(CREATE_TABLE + TABLE_BRANDS +
+            "(" + _ID_IPKA + _COM + COLUMN_BRANDS_BRAND + TYPE_INT + ")");
+      // определяем табл. NAMES
+      db.execSQL(CREATE_TABLE + TABLE_NAMES +
+            "(" + _ID_IPKA + _COM + COLUMN_NAMES_NAME + TYPE_TEXT + _COM + ")");
+      // определяем табл. VARIETIES
+
+      sqlString = CREATE_TABLE + TABLE_VERIETIES +
+        "(" + _ID_IPKA + _COM + COLUMN_VERIETIES_BRAND_ID + TYPE_INT + _COM +
+        COLUMN_VERIETIES_NAME_ID + TYPE_INT + _COM +
+        COLUMN_VERIETIES_BITTER + TYPE_INT + _COM +
+        COLUMN_VERIETIES_DESCRIPTION + TYPE_TEXT + _COM +
+        COLUMN_VERIETIES_HREFIMG + TYPE_TEXT + _COM +
+        "FOREIGN_KEY" + "(" + COLUMN_VERIETIES_NAME_ID +")" +
+        "REFERENCES" + TABLE_NAMES + "(" + COLUMN_NAMES_ID + ")" + _COM +
+        "FOREIGN_KEY" + "(" + COLUMN_VERIETIES_BRAND_ID +")" +
+        "REFERENCES" + TABLE_BRANDS + "(" + COLUMN_BRANDS_ID + ")" + ")" ;
+
+      Log.i("sqlString: ",sqlString);
+      db.execSQL(sqlString);
+      // первичное заполнение таблиц
+
+      ContentValues rowValues = new ContentValues();
+
+      rowValues.put(COLUMN_NAMES_NAME, "Draught");
+      db.insert(TABLE_NAMES, null, rowValues);
+      rowValues.put(COLUMN_NAMES_NAME, "Lager");
+      db.insert(TABLE_NAMES, null, rowValues);
+      rowValues.put(COLUMN_NAMES_NAME, "Real Ale");
+      db.insert(TABLE_NAMES, null, rowValues);
+      rowValues.put(COLUMN_NAMES_NAME, "Dark Ale");
+      db.insert(TABLE_NAMES, null, rowValues);
+      rowValues.put(COLUMN_NAMES_NAME, "Stout");
+      db.insert(TABLE_NAMES, null, rowValues);
+      rowValues.put(COLUMN_NAMES_NAME, "Indian Pale Ale (IPA)");
+      db.insert(TABLE_NAMES, null, rowValues);
+      rowValues.put(COLUMN_NAMES_NAME, "English Bitter");
+      db.insert(TABLE_NAMES, null, rowValues);
+      rowValues.put(COLUMN_NAMES_NAME, "Wheat Beer");
+      db.insert(TABLE_NAMES, null, rowValues);
+
+      rowValues.put(COLUMN_BRANDS_BRAND, "Coopers");
+      db.insert(TABLE_BRANDS, null, rowValues);
+      rowValues.put(COLUMN_BRANDS_BRAND, "Muntons");
+      db.insert(TABLE_BRANDS, null, rowValues);
+      rowValues.put(COLUMN_BRANDS_BRAND, "Finlandia");
+      db.insert(TABLE_BRANDS, null, rowValues);
+
+      rowValues.put(COLUMN_VERIETIES_NAME_ID, 1);
+      rowValues.put(COLUMN_VERIETIES_BRAND_ID, 1);
+      rowValues.put(COLUMN_VERIETIES_BITTER, 31);
+      rowValues.put(COLUMN_VERIETIES_COLOR, 10);
+      rowValues.put(COLUMN_VERIETIES_HREFIMG, "http://www.coopersbeer.ru/draught_with-.jpg");
+      rowValues.put(COLUMN_VERIETIES_DESCRIPTION, "Светлое горьковатое , универсальное " +
+              "по сезону и продуктам");
+      db.insert(TABLE_VERIETIES, null, rowValues);
+
+      rowValues.put(COLUMN_VERIETIES_NAME_ID, 2);
+      rowValues.put(COLUMN_VERIETIES_BRAND_ID, 1);
+      rowValues.put(COLUMN_VERIETIES_BITTER, 29);
+      rowValues.put(COLUMN_VERIETIES_COLOR, 7);
+      rowValues.put(COLUMN_VERIETIES_HREFIMG, "http://www.coopersbeer.ru/european-lager.jpg");
+      rowValues.put(COLUMN_VERIETIES_DESCRIPTION, "Очень светлое слабо горькое , летнее, " +
+              "рыба, белая птица");
+      db.insert(TABLE_VERIETIES, null, rowValues);
+
+      rowValues.put(COLUMN_VERIETIES_NAME_ID, 3);
+      rowValues.put(COLUMN_VERIETIES_BRAND_ID, 1);
+      rowValues.put(COLUMN_VERIETIES_BITTER, 41);
+      rowValues.put(COLUMN_VERIETIES_COLOR, 17);
+      rowValues.put(COLUMN_VERIETIES_HREFIMG, "http://www.coopersbeer.ru/real-ale_.jpg");
+      rowValues.put(COLUMN_VERIETIES_DESCRIPTION, "Среднее горьковатое , универсальное по сезону, " +
+              "мясо, птица");
+      db.insert(TABLE_VERIETIES, null, rowValues);
+
+
   }
 
   @Override         // апгрейд можно определить позже
