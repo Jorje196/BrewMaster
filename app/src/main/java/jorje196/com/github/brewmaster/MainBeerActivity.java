@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 public class MainBeerActivity extends Activity {
 
+    public static BrewDbRepository brewDbRepos;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,6 +20,9 @@ public class MainBeerActivity extends Activity {
         num_saying = (int) (Math.random() * top_aphorisms.length);
         TextView aphorismView = (TextView) findViewById(R.id.top_aphorism);
         aphorismView.setText(top_aphorisms[num_saying]);
+
+        // открываем БД
+        brewDbRepos = new BrewDbRepository(getApplicationContext());
     }
 
     //для отображения меню на панели действий реализуем метод onCreateOptionsMenu()

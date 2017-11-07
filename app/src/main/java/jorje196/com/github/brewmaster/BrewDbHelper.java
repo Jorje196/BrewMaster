@@ -48,22 +48,9 @@ class BrewDbHelper extends SQLiteOpenHelper {
     public BrewDbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
-    public static String sqlString;
+
      public static long exceptCount = 0;
 
-    // метод записи в простую таблицу
-    private void insertSimpleTable
-    (SQLiteDatabase db, String tableName, String columnName, String cellContent){
-        ContentValues rowValues = new ContentValues();
-        rowValues.put(columnName, cellContent);
-        db.insert(tableName, null, rowValues);
-    }
-
-    private void insertSimpleTable
-            (SQLiteDatabase db, String tableName, String columnName, int cellContent){
-        // для числовых случаев : int, float
-
-    }
 
 
     @Override
@@ -71,7 +58,7 @@ class BrewDbHelper extends SQLiteOpenHelper {
   Создаем таблицы и записываем данные.
    */
     public void onCreate(SQLiteDatabase db){
-
+        String sqlString;
         try {
             // опредеяем табл. BRANDS
             db.execSQL(CREATE_TABLE + TABLE_BRANDS +
@@ -91,36 +78,30 @@ class BrewDbHelper extends SQLiteOpenHelper {
                 "REFERENCES" + TABLE_NAMES + "(" + COLUMN_NAMES_ID + ")" + _COM +
                 "FOREIGN_KEY" + "(" + COLUMN_VERIETIES_BRAND_ID + ")" +
                 "REFERENCES" + TABLE_BRANDS + "(" + COLUMN_BRANDS_ID + ")" + ")";
-
             // Log.i("sqlString: ",sqlString);
             db.execSQL(sqlString);
+
         // первичное заполнение таблиц
+            // названия
+            MainBeerActivity.brewDbRepos.insertName("Draught");
+            MainBeerActivity.brewDbRepos.insertName("Lager");
+            MainBeerActivity.brewDbRepos.insertName("Real Ale");
+            MainBeerActivity.brewDbRepos.insertName("Dark Ale");
+            MainBeerActivity.brewDbRepos.insertName("Stout");
+            MainBeerActivity.brewDbRepos.insertName("Indian Pale Ale (IPA)");
+            MainBeerActivity.brewDbRepos.insertName("English Bitter");
+            MainBeerActivity.brewDbRepos.insertName("Wheat Beer");
+            // бренды
+            MainBeerActivity.brewDbRepos.insertBrand("Coopers");
+            MainBeerActivity.brewDbRepos.insertBrand("Muntons");
+            MainBeerActivity.brewDbRepos.insertBrand("Finlandia");
+            MainBeerActivity.brewDbRepos.insertBrand("BrewDemon");
+            MainBeerActivity.brewDbRepos.insertBrand("Brewferm");
+            MainBeerActivity.brewDbRepos.insertBrand("Inpinto");
 
             ContentValues rowValues = new ContentValues();
 
-            rowValues.put(COLUMN_NAMES_NAME, "Draught");
-            db.insert(TABLE_NAMES, null, rowValues);
-            rowValues.put(COLUMN_NAMES_NAME, "Lager");
-            db.insert(TABLE_NAMES, null, rowValues);
-            rowValues.put(COLUMN_NAMES_NAME, "Real Ale");
-            db.insert(TABLE_NAMES, null, rowValues);
-            rowValues.put(COLUMN_NAMES_NAME, "Dark Ale");
-            db.insert(TABLE_NAMES, null, rowValues);
-            rowValues.put(COLUMN_NAMES_NAME, "Stout");
-            db.insert(TABLE_NAMES, null, rowValues);
-            rowValues.put(COLUMN_NAMES_NAME, "Indian Pale Ale (IPA)");
-            db.insert(TABLE_NAMES, null, rowValues);
-            rowValues.put(COLUMN_NAMES_NAME, "English Bitter");
-            db.insert(TABLE_NAMES, null, rowValues);
-            rowValues.put(COLUMN_NAMES_NAME, "Wheat Beer");
-            db.insert(TABLE_NAMES, null, rowValues);
 
-            rowValues.put(COLUMN_BRANDS_BRAND, "Coopers");
-            db.insert(TABLE_BRANDS, null, rowValues);
-            rowValues.put(COLUMN_BRANDS_BRAND, "Muntons");
-            db.insert(TABLE_BRANDS, null, rowValues);
-            rowValues.put(COLUMN_BRANDS_BRAND, "Finlandia");
-            db.insert(TABLE_BRANDS, null, rowValues);
 
             rowValues.put(COLUMN_VERIETIES_NAME_ID, 1);
             rowValues.put(COLUMN_VERIETIES_BRAND_ID, 1);
@@ -158,3 +139,26 @@ class BrewDbHelper extends SQLiteOpenHelper {
         // определим позже
   }
 }
+        /*    rowValues.put(COLUMN_NAMES_NAME, "Draught");
+            db.insert(TABLE_NAMES, null, rowValues);
+            rowValues.put(COLUMN_NAMES_NAME, "Lager");
+            db.insert(TABLE_NAMES, null, rowValues);
+            rowValues.put(COLUMN_NAMES_NAME, "Real Ale");
+            db.insert(TABLE_NAMES, null, rowValues);
+            rowValues.put(COLUMN_NAMES_NAME, "Dark Ale");
+            db.insert(TABLE_NAMES, null, rowValues);
+            rowValues.put(COLUMN_NAMES_NAME, "Stout");
+            db.insert(TABLE_NAMES, null, rowValues);
+            rowValues.put(COLUMN_NAMES_NAME, "Indian Pale Ale (IPA)");
+            db.insert(TABLE_NAMES, null, rowValues);
+            rowValues.put(COLUMN_NAMES_NAME, "English Bitter");
+            db.insert(TABLE_NAMES, null, rowValues);
+            rowValues.put(COLUMN_NAMES_NAME, "Wheat Beer");
+            db.insert(TABLE_NAMES, null, rowValues);*/
+
+                    /*rowValues.put(COLUMN_BRANDS_BRAND, "Coopers");
+            db.insert(TABLE_BRANDS, null, rowValues);
+            rowValues.put(COLUMN_BRANDS_BRAND, "Muntons");
+            db.insert(TABLE_BRANDS, null, rowValues);
+            rowValues.put(COLUMN_BRANDS_BRAND, "Finlandia");
+            db.insert(TABLE_BRANDS, null, rowValues); */
