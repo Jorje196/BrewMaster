@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.junit.Test;
 
+import static jorje196.com.github.brewmaster.BrewDbHelper.exceptCount;
 import static org.junit.Assert.*;
 
 /**
@@ -14,6 +15,9 @@ public class BrewDbHelperTest {
 
     @Test
     public void onCreate() throws Exception {
+
+
+     assertEquals(0,exceptCount);
 
     }
 
