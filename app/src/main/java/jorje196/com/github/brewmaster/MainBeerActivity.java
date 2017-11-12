@@ -1,6 +1,7 @@
 package jorje196.com.github.brewmaster;
 
 import android.app.Activity;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -8,7 +9,9 @@ import android.widget.TextView;
 
 public class MainBeerActivity extends Activity {
 
-    public static BrewDbRepository brewDbRepos;
+    public DbContract brewDbRepos;
+    private BrewDbHelper brewDbHelper;
+    private SQLiteDatabase brewDb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,7 +25,14 @@ public class MainBeerActivity extends Activity {
         aphorismView.setText(top_aphorisms[num_saying]);
 
         // открываем БД
-        brewDbRepos = new BrewDbRepository(getApplicationContext());
+        // подключение к БД
+        brewDb = new BrewDbHelper(this).getWritableDatabase();
+        // проверка по внешним ключам д.б. включена
+        brewDb.setForeignKeyConstraintsEnabled (true);
+        int i = 0;
+        brewDb.close();
+        i++;
+
     }
 
     //для отображения меню на панели действий реализуем метод onCreateOptionsMenu()
