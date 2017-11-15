@@ -32,7 +32,10 @@ public class MainBeerActivity extends Activity {
         int i = 0;
         brewDb.close();
         i++;
+        String strPath = brewDb.getPath();
+        i++;
 
+      //  brewDb.deleteDatabase("BrewDb.db");
     }
 
     //для отображения меню на панели действий реализуем метод onCreateOptionsMenu()

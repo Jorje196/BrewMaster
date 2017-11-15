@@ -5,6 +5,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+
 /**
  * Created by User on 01.11.2017.
  * Helper для создания и управления базой данных
@@ -13,26 +15,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 class BrewDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "BrewDb.db";
     private static final int DB_VERSION = 1;
-
-
-
-    public static final String TABLE_BRANDS = "brands";
-    public static final String COLUMN_BRANDS_ID = "_id";
-    public static final String COLUMN_BRANDS_BRAND = "brand";
-
-
-
-    public static final String TABLE_VERIETIES = "verieties";
-    public static final String COLUMN_VERIETIES_ID ="_id";
-    public static final String COLUMN_VERIETIES_BRAND_ID = "brand_id";
-    public static final String COLUMN_VERIETIES_NAME_ID = "name_id";
-    public static final String COLUMN_VERIETIES_HREFIMG = "href_img";
-    public static final String COLUMN_VERIETIES_BITTER = "bitter";
-    public static final String COLUMN_VERIETIES_COLOR = "color";
-    public static final String COLUMN_VERIETIES_DESCRIPTION = "description";
-
-
-
 
     public BrewDbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -51,34 +33,15 @@ class BrewDbHelper extends SQLiteOpenHelper {
         String sqlString;
         try {
             // опредеяем табл. BRANDS
- /*           String current = CREATE_TABLE + TABLE_BRANDS +
-                    "(" + _ID_IPKA + _COM + COLUMN_BRANDS_BRAND + TYPE_INT + ")";
-            db.execSQL(current);  */
+            db.execSQL(DbContract.DbBrands.CREATE_TABLE_BRANDS);
             // определяем табл. NAMES
-
             db.execSQL(DbContract.DbNames.CREATE_TABLE_NAMES);
-/*            // определяем табл. VARIETIES
-
-            sqlString = CREATE_TABLE + TABLE_VERIETIES +
-                "(" + _ID_IPKA + _COM + COLUMN_VERIETIES_BRAND_ID + TYPE_INT + _COM +
-                COLUMN_VERIETIES_NAME_ID + TYPE_INT + _COM +
-                COLUMN_VERIETIES_BITTER + TYPE_INT + _COM +
-                COLUMN_VERIETIES_DESCRIPTION + TYPE_TEXT + _COM +
-                COLUMN_VERIETIES_HREFIMG + TYPE_TEXT + _COM +
-                "FOREIGN KEY (" + COLUMN_VERIETIES_NAME_ID + ") " +
-                "REFERENCES " + TABLE_NAMES + "(" + COLUMN_NAMES_ID + ")" + _COM +
-                "FOREIGN KEY (" + COLUMN_VERIETIES_BRAND_ID + ") " +
-                "REFERENCES " + TABLE_BRANDS + "(" + COLUMN_BRANDS_ID + "))";
-
-            // Log.i("sqlString: ",sqlString);
-            db.execSQL(sqlString); */
+            // определяем табл. VARIETIES
+            db.execSQL(DbContract.DbVerieties.CREATE_TABLE_VERIETIES);
 
         // первичное заполнение таблиц
-            // названия
+                // названия
             DbContract.DbNames.insertName(db, "Draught");
-            String str = DbContract.DbNames.getName(db, 1);
-            int i = DbContract.DbNames.getNameId(db, "Draught");
-
             DbContract.DbNames.insertName(db, "Lager");
             DbContract.DbNames.insertName(db, "Real Ale");
             DbContract.DbNames.insertName(db, "Dark Ale");
@@ -86,46 +49,41 @@ class BrewDbHelper extends SQLiteOpenHelper {
             DbContract.DbNames.insertName(db, "Indian Pale Ale (IPA)");
             DbContract.DbNames.insertName(db, "English Bitter");
             DbContract.DbNames.insertName(db, "Wheat Beer");
+ /*    String str = DbContract.DbNames.getName(db, 1);
+            int i = DbContract.DbNames.getNameId(db, "Draught"); */
+                // бренды
+            DbContract.DbBrands.insertBrand(db, "Coopers");
+            DbContract.DbBrands.insertBrand(db, "Muntons");
+            DbContract.DbBrands.insertBrand(db, "Finlandia");
+            DbContract.DbBrands.insertBrand(db, "BrewDemon");
+            DbContract.DbBrands.insertBrand(db, "Brewferm");
+            DbContract.DbBrands.insertBrand(db, "Inpinto");
 
-            /*
-            // бренды
-            MainBeerActivity.brewDbRepos.insertBrand("Coopers");
-            MainBeerActivity.brewDbRepos.insertBrand("Muntons");
-            MainBeerActivity.brewDbRepos.insertBrand("Finlandia");
-            MainBeerActivity.brewDbRepos.insertBrand("BrewDemon");
-            MainBeerActivity.brewDbRepos.insertBrand("Brewferm");
-            MainBeerActivity.brewDbRepos.insertBrand("Inpinto");
+                // итоговая (brand+name) таблица характеристик
+            DbContract.DbVerieties.insertVerieties(db, "Draught", "Coopers",
+                    31, 10,
+                    "http://www.coopersbeer.ru/draught _with-.jpg",
+                    "Очень светлое слабо горькое , летнее, рыба, белая птица");
+            DbContract.DbVerieties.insertVerieties(db, "Lager", "Coopers",
+                    29, 7,
+                    "http://www.coopersbeer.ru/LAGER.jpg",
+                    "Очень светлое слабо горькое , летнее, рыба, белая птица");
+            DbContract.DbVerieties.insertVerieties(db, "Real Ale", "Coopers",
+                    41, 17,
+                    "http://www.coopersbeer.ru/real-ale_.jpg",
+                    "Среднее горьковатое , универсальное по сезону, мясо, птица");
+            DbContract.DbVerieties.insertVerieties(db, "Wheat Beer", "Muntons",
+                    30, 8,
+                    "http://www.muntonshomebrew.com/wp-content/uploads/2012/09/connoisseur_wheat_beer.jpg",
+                    "Пшеничное, скорее летнее, самодостаточно, на любителя белая птица");
+            // может длинные вынести в string-ресурс ?
 
-            ContentValues rowValues = new ContentValues();
+
+            // тестовая часть
+            ArrayList<String> bitterList = new ArrayList<String>();
+            bitterList = DbContract.DbVerieties.getVerietiesBitter(db, "1");
 
 
-
-            rowValues.put(COLUMN_VERIETIES_NAME_ID, 1);
-            rowValues.put(COLUMN_VERIETIES_BRAND_ID, 1);
-            rowValues.put(COLUMN_VERIETIES_BITTER, 31);
-            rowValues.put(COLUMN_VERIETIES_COLOR, 10);
-            rowValues.put(COLUMN_VERIETIES_HREFIMG, "http://www.coopersbeer.ru/draught _with-.jpg");
-            rowValues.put(COLUMN_VERIETIES_DESCRIPTION, "Светлое горьковатое , универсальное " +
-                "по сезону и продуктам");
-            db.insert(TABLE_VERIETIES, null, rowValues);
-
-            rowValues.put(COLUMN_VERIETIES_NAME_ID, 2);
-            rowValues.put(COLUMN_VERIETIES_BRAND_ID, 1);
-            rowValues.put(COLUMN_VERIETIES_BITTER, 29);
-            rowValues.put(COLUMN_VERIETIES_COLOR, 7);
-            rowValues.put(COLUMN_VERIETIES_HREFIMG, "http://www.coopersbeer.ru/european-lager.jpg");
-            rowValues.put(COLUMN_VERIETIES_DESCRIPTION, "Очень светлое слабо горькое , летнее, " +
-                "рыба, белая птица");
-            db.insert(TABLE_VERIETIES, null, rowValues);
-
-            rowValues.put(COLUMN_VERIETIES_NAME_ID, 3);
-            rowValues.put(COLUMN_VERIETIES_BRAND_ID, 1);
-            rowValues.put(COLUMN_VERIETIES_BITTER, 41);
-            rowValues.put(COLUMN_VERIETIES_COLOR, 17);
-            rowValues.put(COLUMN_VERIETIES_HREFIMG, "http://www.coopersbeer.ru/real-ale_.jpg");
-            rowValues.put(COLUMN_VERIETIES_DESCRIPTION, "Среднее горьковатое , универсальное по сезону, " +
-                "мясо, птица");
-            db.insert(TABLE_VERIETIES, null, rowValues);  */
         } catch (SQLException e) {
             exceptCount++;
         }
