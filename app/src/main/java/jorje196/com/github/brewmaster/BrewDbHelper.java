@@ -5,8 +5,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.util.ArrayList;
-
 /**
  * Created by User on 01.11.2017.
  * Helper для создания и управления базой данных
@@ -16,21 +14,16 @@ class BrewDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "BrewDb.db";
     private static final int DB_VERSION = 1;
 
-    public BrewDbHelper(Context context) {
+    BrewDbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
-        int i = 1;
     }
-
-     public static long exceptCount = 0;
-
-
 
     @Override
   /* Метод вызывается при создании БД .
   Создаем таблицы и записываем данные.
    */
     public void onCreate(SQLiteDatabase db){
-        String sqlString;
+
         try {
             // опредеяем табл. BRANDS
             db.execSQL(DbContract.DbBrands.CREATE_TABLE_BRANDS);
@@ -62,16 +55,32 @@ class BrewDbHelper extends SQLiteOpenHelper {
                 // итоговая (brand+name) таблица характеристик
             DbContract.DbVerieties.insertVerieties(db, "Draught", "Coopers",
                     31, 10,
-                    "http://www.coopersbeer.ru/draught _with-.jpg",
-                    "Очень светлое слабо горькое , летнее, рыба, белая птица");
+                    "http://www.coopersbeer.ru/draught_with-.jpg",
+                    "Светлое слабо горькое , скорее летнее, рыба, белая птица");
             DbContract.DbVerieties.insertVerieties(db, "Lager", "Coopers",
                     29, 7,
                     "http://www.coopersbeer.ru/LAGER.jpg",
                     "Очень светлое слабо горькое , летнее, рыба, белая птица");
+            DbContract.DbVerieties.insertVerieties(db, "English Bitter", "Coopers",
+                    43, 31,
+                    "http://www.coopersbeer.ru/imgs/beer/s_english_bitter.jpg",
+                    "Горькое, универсальное по сезону, ближе к мясу с соответствующими соусами и гарниром");
             DbContract.DbVerieties.insertVerieties(db, "Real Ale", "Coopers",
                     41, 17,
                     "http://www.coopersbeer.ru/real-ale_.jpg",
                     "Среднее горьковатое , универсальное по сезону, мясо, птица");
+            DbContract.DbVerieties.insertVerieties(db, "Dark Ale", "Coopers",
+                    43, 48,
+                    "http://www.coopersbeer.ru/diy-dark-ale_with-glass_1450063652.jpg",
+                    "Горькое, темное, универсальное по сезону, но приятнее зимой и к мясу ");
+            DbContract.DbVerieties.insertVerieties(db, "Stout", "Coopers",
+                    52, 133,
+                    "http://www.coopersbeer.ru/diy-stout_.jpg",
+                    "Стаут, универсальное по сезону, но особенно хорош зимним вечером ");
+            DbContract.DbVerieties.insertVerieties(db, "Indian Pale Ale (IPA)", "Coopers",
+                    62, 17,
+                    "http://www.coopersbeer.ru/brew_glass_ipa_.jpg",
+                    "Горькое, самодостаточное в любое время года, если к мясу, то на гриле");
             DbContract.DbVerieties.insertVerieties(db, "Wheat Beer", "Muntons",
                     30, 8,
                     "http://www.muntonshomebrew.com/wp-content/uploads/2012/09/connoisseur_wheat_beer.jpg",
@@ -79,13 +88,8 @@ class BrewDbHelper extends SQLiteOpenHelper {
             // может длинные вынести в string-ресурс ?
 
 
-            // тестовая часть
-            ArrayList<String> bitterList = new ArrayList<String>();
-            bitterList = DbContract.DbVerieties.getVerietiesBitter(db, "1");
-
-
         } catch (SQLException e) {
-            exceptCount++;
+            // exceptCount++;
         }
 
     }

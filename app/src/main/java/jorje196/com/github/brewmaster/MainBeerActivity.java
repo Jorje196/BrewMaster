@@ -7,11 +7,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class MainBeerActivity extends Activity {
 
-    public DbContract brewDbRepos;
-    private BrewDbHelper brewDbHelper;
-    private SQLiteDatabase brewDb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,18 +23,26 @@ public class MainBeerActivity extends Activity {
         TextView aphorismView = (TextView) findViewById(R.id.top_aphorism);
         aphorismView.setText(top_aphorisms[num_saying]);
 
-        // открываем БД
         // подключение к БД
+        SQLiteDatabase brewDb;
         brewDb = new BrewDbHelper(this).getWritableDatabase();
         // проверка по внешним ключам д.б. включена
         brewDb.setForeignKeyConstraintsEnabled (true);
-        int i = 0;
-        brewDb.close();
-        i++;
-        String strPath = brewDb.getPath();
-        i++;
 
-      //  brewDb.deleteDatabase("BrewDb.db");
+        // тестовая часть: выбираем все Coopers с 30 <= bitter <= 40
+        ArrayList<String> bitterList ;
+        bitterList = DbContract.DbVerieties.getVerietiesTextByBitterSpan(brewDb, "Coopers",28,43);
+
+        brewDb.close();
+
+        /* блок для отладки onCreate & onUpgrade
+        String strPath = brewDb.getPath();
+        int x;
+        if(deleteDatabase(strPath)) {
+            x = 1;
+        } else {
+            x = -1;
+        }   */
     }
 
     //для отображения меню на панели действий реализуем метод onCreateOptionsMenu()
