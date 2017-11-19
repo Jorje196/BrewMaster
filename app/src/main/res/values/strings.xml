@@ -7,4 +7,5 @@
     <string name="action_brew_list">Варки</string>
     <string name="action_edit_brew">Текущие варки</string>
     <string name="action_create_brew">Новая варка</string>
+    <string name="action_share">Поделиться</string>
 </resources>

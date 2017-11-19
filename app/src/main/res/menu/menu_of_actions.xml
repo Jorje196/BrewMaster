@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainBeerActivity">
 
     <item android:id="@+id/action_search"
         android:title="@string/action_search"
@@ -13,10 +15,16 @@
         android:orderInCategory="6"
         android:showAsAction="ifRoom" />
 
+    <item android:id="@+id/action_share"
+        android:title="@string/action_share"
+        android:actionProviderClass="android.widget.ShareActionProvider"
+        android:orderInCategory="7"
+        android:showAsAction="ifRoom" />
+
     <item android:id="@+id/action_edit_brew"
         android:title="@string/action_edit_brew"
         android:icon="@drawable/ic_playlist_add_black_24dp"
-        android:orderInCategory="7"
+        android:orderInCategory="9"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/action_create_brew"
