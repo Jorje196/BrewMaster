@@ -1,10 +1,13 @@
 package jorje196.com.github.brewmaster;
 
 import android.app.Activity;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class MainBeerActivity extends Activity {
 
@@ -19,6 +22,27 @@ public class MainBeerActivity extends Activity {
         num_saying = (int) (Math.random() * top_aphorisms.length);
         TextView aphorismView = (TextView) findViewById(R.id.top_aphorism);
         aphorismView.setText(top_aphorisms[num_saying]);
+
+        // подключение к БД
+        SQLiteDatabase brewDb;
+        brewDb = new BrewDbHelper(this).getWritableDatabase();
+        // проверка по внешним ключам д.б. включена
+        brewDb.setForeignKeyConstraintsEnabled (true);
+
+        // тестовая часть: выбираем все Coopers с 30 <= bitter <= 40
+        ArrayList<String> bitterList ;
+        bitterList = DbContract.DbVerieties.getVerietiesTextByBitterSpan(brewDb, "Coopers",28,43);
+
+        brewDb.close();
+
+        /* блок для отладки onCreate & onUpgrade
+        String strPath = brewDb.getPath();
+        int x;
+        if(deleteDatabase(strPath)) {
+            x = 1;
+        } else {
+            x = -1;
+        }   */
     }
 
     //для отображения меню на панели действий реализуем метод onCreateOptionsMenu()
