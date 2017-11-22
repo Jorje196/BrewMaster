@@ -8,4 +8,23 @@
     <string name="action_edit_brew">Текущие варки</string>
     <string name="action_create_brew">Новая варка</string>
     <string name="action_share">Поделиться</string>
+
+    <!-- временный блок -->
+    <string-array name="planets_array">
+        <item>Mercury</item>
+        <item>Venus</item>
+        <item>Earth</item>
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="topFrag">Top fragment Top fragment Top fragment Top fragment Top fragment Top fragment</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
