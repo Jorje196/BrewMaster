@@ -3,16 +3,21 @@ package jorje196.com.github.brewmaster;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+//import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.SimpleCursorAdapter;
+//import android.widget.TextView;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.Toast;
 
 
 import java.util.ArrayList;
@@ -22,48 +27,53 @@ public class MainBeerActivity extends Activity {
     private String[] planetsArray;    // список планет
     private ListView drawerList;    // списковое представление для drawer"а
     private DrawerLayout drawerLayout;
+    private SQLiteDatabase brewDb;
+    private Cursor cursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_beer);
 
-        // Инициализация выдвижной панель
-
-        // массив строк из ресурса
-        planetsArray = getResources().getStringArray(R.array.planets_array);
-        // ссылка на списочное представление из реса
-        drawerList = (ListView)findViewById(R.id.drawer);
-        // получить ссылку на drawerLayout
-        drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        // связываем списочное представление с массивом строк через адаптор
-        drawerList.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, planetsArray));
-        // создаем экземпляр для слушателя спискового представления
-        drawerList.setOnItemClickListener(new DrawerItemClickListener());
-        // Выбираем стартовый фрагмент для фрейма
-        if (savedInstanceState==null) {
-            selectItem(0, 0);
-        }
-
-
-        // выбираем присказку , картинка пока безальтернативна
-        int num_saying;
-        String[] top_aphorisms = getResources().getStringArray(R.array.aphorisms);
-        num_saying = (int) (Math.random() * top_aphorisms.length);
-    //    TextView aphorismView = (TextView) findViewById(R.id.top_aphorism);
-    //    aphorismView.setText(top_aphorisms[num_saying]);
-
         // подключение к БД
-  /*  2--    SQLiteDatabase brewDb;
-        brewDb = new BrewDbHelper(this).getWritableDatabase();
-        // проверка по внешним ключам д.б. включена
-        brewDb.setForeignKeyConstraintsEnabled (true);
+        try   {
+            brewDb = new BrewDbHelper(this).getWritableDatabase();
+          // проверка по внешним ключам д.б. включена
+            brewDb.setForeignKeyConstraintsEnabled(true);
+
+          // Инициализация выдвижной панель
+            cursor = brewDb.query(DbContract.DbNames.TABLE_NAMES,
+              new String[] {DbContract.DbNames.COLUMN_NAMES_ID, DbContract.DbNames.COLUMN_NAMES_NAME},
+                    null, null, null, null, DbContract.DbNames.COLUMN_NAMES_NAME);
+            CursorAdapter dbAdapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_list_item_1, cursor, new String[]{DbContract.DbNames.COLUMN_NAMES_NAME},
+                    new int[]{android.R.id.text1}, 0);
+
+             // массив строк из ресурса
+              //    planetsArray = getResources().getStringArray(R.array.planets_array);
+              // ссылка на списочное представление из реса
+            drawerList = (ListView) findViewById(R.id.drawer);
+              // получить ссылку на drawerLayout
+            drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+              // связываем списочное представление с массивом строк через адаптор
+            //drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, planetsArray));
+            drawerList.setAdapter(dbAdapter);
+              // создаем экземпляр для слушателя спискового представления
+            drawerList.setOnItemClickListener(new DrawerItemClickListener());
+              // Выбираем стартовый фрагмент для фрейма
+            if (savedInstanceState == null) {
+                selectItem(0, 0);
+            }
+        } catch (SQLException e) {
+            Toast toast = Toast.makeText(this, "Problem with Database", Toast.LENGTH_SHORT);
+          toast.show();
+      }
 
         // тестовая часть: выбираем все Coopers с 30 <= bitter <= 40
-        ArrayList<String> bitterList ;
-        bitterList = DbContract.DbVerieties.getVerietiesTextByBitterSpan(brewDb, "Coopers",28,43);
+        //ArrayList<String> bitterList ;
+        // bitterList = DbContract.DbVerieties.getVerietiesTextByBitterSpan(brewDb, "Coopers",28,43);
 
-        brewDb.close(); --2*/
+      //  brewDb.close();
 
         /* блок для отладки onCreate & onUpgrade
         String strPath = brewDb.getPath();
@@ -92,7 +102,9 @@ public class MainBeerActivity extends Activity {
             case 0 :
                 fragment = new TopFragment();
                 break;
-            default : {}
+            default : {
+                fragment = new TopFragment();
+            }
         }
         // выводим фрагмент с исп транзакции фрагмента
         FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -135,5 +147,11 @@ public class MainBeerActivity extends Activity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    @Override
+    public void onDestroy (){
+        super.onDestroy();
+        cursor.close();
+        brewDb.close();
     }
 }

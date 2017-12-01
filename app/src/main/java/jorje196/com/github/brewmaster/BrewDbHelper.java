@@ -25,12 +25,17 @@ class BrewDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db){
 
         try {
-            // опредеяем табл. BRANDS
+            // создание таблиц , справочные first
             db.execSQL(DbContract.DbBrands.CREATE_TABLE_BRANDS);
-            // определяем табл. NAMES
             db.execSQL(DbContract.DbNames.CREATE_TABLE_NAMES);
-            // определяем табл. VARIETIES
+            db.execSQL(DbContract.DbCans.CREATE_TABLE_CANS);
+            db.execSQL(DbContract.DbThickeners.CREATE_TABLE_THICKENERS);
+            db.execSQL(DbContract.DbEnhancers.CREATE_TABLE_ENHANCERS);
+
             db.execSQL(DbContract.DbVerieties.CREATE_TABLE_VERIETIES);
+
+            db.execSQL(DbContract.DbBrews.CREATE_TABLE_BREWS);
+
 
         // первичное заполнение таблиц
                 // названия
@@ -42,8 +47,8 @@ class BrewDbHelper extends SQLiteOpenHelper {
             DbContract.DbNames.insertName(db, "Indian Pale Ale (IPA)");
             DbContract.DbNames.insertName(db, "English Bitter");
             DbContract.DbNames.insertName(db, "Wheat Beer");
- /*    String str = DbContract.DbNames.getName(db, 1);
-            int i = DbContract.DbNames.getNameId(db, "Draught"); */
+
+
                 // бренды
             DbContract.DbBrands.insertBrand(db, "Coopers");
             DbContract.DbBrands.insertBrand(db, "Muntons");
@@ -51,6 +56,17 @@ class BrewDbHelper extends SQLiteOpenHelper {
             DbContract.DbBrands.insertBrand(db, "BrewDemon");
             DbContract.DbBrands.insertBrand(db, "Brewferm");
             DbContract.DbBrands.insertBrand(db, "Inpinto");
+
+                // загустители
+            DbContract.DbThickeners.insertThickener(db, "maltodextrin");
+
+                // усилители
+            DbContract.DbEnhancers.insertEnhancer(db, "Coopers Light Dry Malt");
+            DbContract.DbEnhancers.insertEnhancer(db, "Muntons Light Malt Extract");
+            DbContract.DbEnhancers.insertEnhancer(db, "Muntons Dark Malt Extract");
+
+                // банки
+            DbContract.DbCans.insertCans(db, 1.7, 23.);
 
                 // итоговая (brand+name) таблица характеристик
             DbContract.DbVerieties.insertVerieties(db, "Draught", "Coopers",
@@ -85,11 +101,20 @@ class BrewDbHelper extends SQLiteOpenHelper {
                     30, 8,
                     "http://www.muntonshomebrew.com/wp-content/uploads/2012/09/connoisseur_wheat_beer.jpg",
                     "Пшеничное, скорее летнее, самодостаточно, на любителя белая птица");
-            // может длинные вынести в string-ресурс ?
+            // TODO может длинные вынести в string-ресурс ?
+
+                // варки
+            DbContract.DbBrews.insertBrews(db, 1, 23.0, "2016-09-23 17ч", 9.0, 30, 0.5);
+            DbContract.DbBrews.insertBrews(db, 2, 23.0, "2016-10-12 12ч", 9.5, 28, 1.0);
+            DbContract.DbBrews.insertBrews(db, 3, 23.0, "2016-10-21:11ч", 9.5, 27, 1.0);
+            DbContract.DbBrews.insertBrews(db, 4, 23.0, "2016-11-03:19ч", 9.0, 26, 1.5);
+            DbContract.DbBrews.insertBrews(db, 5, 23.0, "2016-11-20:13ч", 10.5, 28, 1.0);
+            DbContract.DbBrews.insertBrews(db, 6, 23.0, "2016-12-01:23ч", 10.0, 29, 1.5);
 
 
         } catch (SQLException e) {
             // exceptCount++;
+            // TODO определить обрабоку исключения
         }
 
     }
