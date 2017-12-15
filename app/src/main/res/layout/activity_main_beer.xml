@@ -10,14 +10,22 @@
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
+        <TextView
+            android:id="@+id/top_exp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text=""
+           />
+
 
     </FrameLayout>
 
     <!-- Тут описание выдвижной панели -->
     <ListView
         android:id="@+id/drawer"
-        android:layout_width="240dp"
-        android:layout_height="match_parent"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"

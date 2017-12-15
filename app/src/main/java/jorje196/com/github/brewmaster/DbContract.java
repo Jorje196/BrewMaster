@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteException;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 
-import java.nio.Buffer;
 import java.util.ArrayList;
 
 import static android.database.Cursor.FIELD_TYPE_FLOAT;
@@ -22,8 +21,9 @@ import static android.database.Cursor.FIELD_TYPE_STRING;
 public final class DbContract {
 
     public DbContract() {
-    } // Во избежание создания объектов пустой
+    } // Во избежание создания объектов конструктор пустой
 
+    public static final String DB_NAME = "brewDb";
     // определение общих для таблиц констант
     static final String CREATE_TABLE = "CREATE TABLE ";
     static final String _ID_IPKA = "_id INTEGER PRIMARY KEY AUTOINCREMENT";
@@ -31,6 +31,7 @@ public final class DbContract {
     static final String TYPE_TEXT = " TEXT";
     static final String TYPE_REAL = " REAL";
     static final String NOT_DEFINED_TYPE = " N/A ";
+    static final String NOT_DEFINED_DATA = "n/a";
     static final String NOT_NULL = " NOT NULL";
 
     static final String _COM = ", ";  // comma
@@ -109,8 +110,8 @@ public final class DbContract {
         static final String COLUMN_CANS_VOLUME = "volume";  // рекомендованный объем, справочное значение
         // некоторая избыточность по коду при работе с REAL имеет место преднамеренно
         static final String CREATE_TABLE_CANS = CREATE_TABLE + TABLE_CANS +
-                "(" + _ID_IPKA + _COM + COLUMN_CANS_WEIGHT + TYPE_REAL +
-                COLUMN_CANS_VOLUME + TYPE_REAL + ")";
+                "(" + _ID_IPKA + _COM + COLUMN_CANS_WEIGHT + TYPE_REAL + _COM +
+        COLUMN_CANS_VOLUME + TYPE_REAL + ")";
         // Добавление записи в таблицу
         static long insertCans(SQLiteDatabase db, double weight, double volume) {
             ContentValues values = new ContentValues();
@@ -142,6 +143,11 @@ public final class DbContract {
         // Получение volume по id (int)
         static String getCanVolume(SQLiteDatabase db, int canID) {
             return getCanVolume(db, Integer.toString(canID));
+        }
+        // Получение кортежа из таблицы Cans по заданному Id
+        public static ContentValues getCanCortegeById (SQLiteDatabase db, String Id){
+            return getSelectColumnsByFilter(db, TABLE_CANS,
+            null, COLUMN_CANS_ID + " = ?", new String[] {Id}, null) .get(0);
         }
     }
 
@@ -211,11 +217,11 @@ public final class DbContract {
         }
 
         // Получение данных из таблицы
-        static String getName(SQLiteDatabase db, int nameID) {
+        public static String getName(SQLiteDatabase db, int nameID) {
             String strNameID = Integer.toString(nameID);
             return getCellSimple(db, TABLE_NAMES, COLUMN_NAMES_NAME, COLUMN_NAMES_ID, strNameID);
         }
-        static String getName(SQLiteDatabase db, String nameID) {
+        public static String getName(SQLiteDatabase db, String nameID) {
             return getCellSimple(db, TABLE_NAMES, COLUMN_NAMES_NAME, COLUMN_NAMES_ID, nameID);
         }
 
@@ -238,7 +244,7 @@ public final class DbContract {
         }
 
         // Получение данных из таблицы
-        static String getBrand(SQLiteDatabase db, int brandID) {
+        public static String getBrand(SQLiteDatabase db, int brandID) {
             String strBrandID = Integer.toString(brandID);
             return getCellSimple(db, TABLE_BRANDS, COLUMN_BRANDS_BRAND, COLUMN_BRANDS_ID, strBrandID);
         }
@@ -260,51 +266,48 @@ public final class DbContract {
         static final String COLUMN_VERIETIES_BRAND_ID = "brand_id";
         static final String COLUMN_VERIETIES_BITTER = "bitter";
         static final String COLUMN_VERIETIES_COLOR = "color";
+        static final String COLUMN_VERIETIES_CAN_ID = "can_id";
+        static final String COLUMN_VERIETIES_SRCIMG = "src_img";
         static final String COLUMN_VERIETIES_HREFIMG = "href_img";
         static final String COLUMN_VERIETIES_DESCRIPTION = "description";
         // метатаблица типов
-        static final String[][] MT_VERIETIES_TYPES =
-            {{COLUMN_VERIETIES_NAME_ID, COLUMN_VERIETIES_BRAND_ID, COLUMN_VERIETIES_BITTER,
-                    COLUMN_VERIETIES_COLOR, COLUMN_VERIETIES_HREFIMG, COLUMN_VERIETIES_DESCRIPTION},
-             {TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_TEXT, TYPE_TEXT}};
+        static final String[][] MT_VERIETIES_COLUMNS_TYPES = {{COLUMN_VERIETIES_ID, TYPE_INT},
+            {COLUMN_VERIETIES_NAME_ID, TYPE_INT}, {COLUMN_VERIETIES_BRAND_ID, TYPE_INT},
+            {COLUMN_VERIETIES_BITTER, TYPE_INT}, {COLUMN_VERIETIES_COLOR, TYPE_INT},
+            {COLUMN_VERIETIES_CAN_ID, TYPE_INT}, {COLUMN_VERIETIES_SRCIMG, TYPE_TEXT},
+            {COLUMN_VERIETIES_HREFIMG, TYPE_TEXT}, {COLUMN_VERIETIES_DESCRIPTION, TYPE_TEXT}};
 
         static final String CREATE_TABLE_VERIETIES = CREATE_TABLE + TABLE_VERIETIES +
-                "(" + _ID_IPKA + _COM + COLUMN_VERIETIES_NAME_ID + TYPE_INT + _COM +
-                COLUMN_VERIETIES_BRAND_ID + TYPE_INT + _COM +
-                COLUMN_VERIETIES_BITTER + TYPE_INT + _COM +
-                COLUMN_VERIETIES_COLOR + TYPE_INT + _COM +
-                COLUMN_VERIETIES_HREFIMG + TYPE_TEXT + _COM +
-                COLUMN_VERIETIES_DESCRIPTION + TYPE_TEXT + _COM +
+                "(" + _ID_IPKA + getInitString(MT_VERIETIES_COLUMNS_TYPES) + _COM +
                 "FOREIGN KEY (" + COLUMN_VERIETIES_NAME_ID + ") " +
                 "REFERENCES " + DbNames.TABLE_NAMES + "(" + DbNames.COLUMN_NAMES_ID + ")" + _COM +
                 "FOREIGN KEY (" + COLUMN_VERIETIES_BRAND_ID + ") " +
-                "REFERENCES " + DbBrands.TABLE_BRANDS + "(" + DbBrands.COLUMN_BRANDS_ID + "))";
+                "REFERENCES " + DbBrands.TABLE_BRANDS + "(" + DbBrands.COLUMN_BRANDS_ID + ")" + _COM +
+                "FOREIGN KEY (" + COLUMN_VERIETIES_CAN_ID + ") " +
+                "REFERENCES " + DbCans.TABLE_CANS + "(" + DbCans.COLUMN_CANS_ID + "))";
 
         // Добавление записи в таблицу
-        static long insertVerieties(SQLiteDatabase db, String name, String brand, String bitter,
-                                    String color, String refImg, String description) {
-            int bitterInt = Integer.parseInt(bitter);
-            int colorInt = Integer.parseInt(color);
-            return insertVerieties(db, name, brand, bitterInt, colorInt, refImg, description);
-        }
         static long insertVerieties(SQLiteDatabase db, String name, String brand, int bitter,
-                                    int color, String refImg, String description) {
+            int color, int canID, String srcImg, String refImg, String description) {
             int nameID = DbNames.getNameId(db, name);
             int brandID = DbBrands.getBrandId(db, brand);
-            return insertVerieties(db, nameID, brandID, bitter, color, refImg, description);
+            return insertVerieties(db, nameID, brandID, bitter, color, canID, srcImg, refImg, description);
         }
         static long insertVerieties(SQLiteDatabase db, int nameID, int brandID, int bitter,
-                                    int color, String refImg, String description) {
+            int color, int canID, String srcImg, String refImg, String description) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_VERIETIES_NAME_ID, nameID);
             values.put(COLUMN_VERIETIES_BRAND_ID, brandID);
             values.put(COLUMN_VERIETIES_BITTER,bitter);
             values.put(COLUMN_VERIETIES_COLOR,color);
+            values.put(COLUMN_VERIETIES_CAN_ID,canID);
+            values.put(COLUMN_VERIETIES_SRCIMG,srcImg);
             values.put(COLUMN_VERIETIES_HREFIMG,refImg);
             values.put(COLUMN_VERIETIES_DESCRIPTION,description);
             return insertTable(db, TABLE_VERIETIES, values);
         }
         // Получение данных из таблицы
+
         // Получение всех name (+ brand) заданного бренда brand с горькостью из диапазона [bitterMin,bitterMax]
         static ArrayList<String> getVerietiesNameByBitterSpan(SQLiteDatabase db, String brand, int bitterMin, int bitterMax) {
             String columnLF = COLUMN_VERIETIES_NAME_ID;
@@ -317,6 +320,14 @@ public final class DbContract {
             }
             return result;
         }
+
+        // Получение кортежа из таблицы Verieties по заданному Id
+        public static ContentValues getVerietyCortegeById (SQLiteDatabase db, String Id) {
+
+        return getSelectColumnsByFilter(db, TABLE_VERIETIES,
+            null, COLUMN_VERIETIES_ID + " = ?", new String[] {Id}, null) .get(0);
+        }
+
         // Получение всех колонок кроме ссылки на img для всех Coopers, чей bitter = [bitterMin...bitterMax]
         static ArrayList<String> getVerietiesTextByBitterSpan(SQLiteDatabase db, String brand, int bitterMin, int bitterMax){
             String[] columnLF = {COLUMN_VERIETIES_NAME_ID, COLUMN_VERIETIES_BRAND_ID, COLUMN_VERIETIES_BITTER,
@@ -355,8 +366,11 @@ public final class DbContract {
             }
             return result;
         }
-
-
+        // Получение списка id кортежей, содержащих выбранное название
+        static ArrayList<String> getVerietyIdByNameId (SQLiteDatabase db, long nameId) {
+            String columnInf = COLUMN_VERIETIES_NAME_ID + "=? ";
+            return getCells(db, TABLE_VERIETIES, COLUMN_VERIETIES_ID, columnInf, new String[] {Long.toString(nameId)});
+        }
     }
 
 
@@ -370,8 +384,6 @@ public final class DbContract {
         StringBuffer result = new StringBuffer(BUFFER_STRING_SIZE);
         for (int i=1; i< metaData.length; i++) {
             result.append(" ,").append(metaData[i][0]).append(metaData[i][1]);
-            String s = metaData[i][0];
-            s = metaData[i][1];
         }
         return result.toString();
         }
@@ -479,14 +491,17 @@ public final class DbContract {
 
     //  метод insert для непростых (>2 столбцов) таблиц
     private static long insertTable (SQLiteDatabase db, String tableName,ContentValues rowValues){
+        long il = 0;
         try {
-            return db.insertOrThrow(tableName, null, rowValues);
+            il = db.insert(tableName, null, rowValues);
+
         //    res++;
         } catch(SQLiteException e) {
            // "SQLiteDb TABLE " + tableName + " insert fault";
             // TODO доработать Exception
+
         }
-        return (-1);
+        return il;
     }
 
 

@@ -1,8 +1,9 @@
 package jorje196.com.github.brewmaster;
-//import android.support.v7.app.AppCompatActivity;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,14 +22,48 @@ import android.widget.Toast;
 
 
 import java.util.ArrayList;
-import java.util.ListIterator;
 
-public class MainBeerActivity extends Activity {
-    private String[] planetsArray;    // список планет
+import java.util.Locale;
+
+import static jorje196.com.github.brewmaster.DbContract.DbBrands.getBrand;
+import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_VOLUME;
+import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_WEIGHT;
+import static jorje196.com.github.brewmaster.DbContract.DbCans.getCanCortegeById;
+import static jorje196.com.github.brewmaster.DbContract.DbNames.getName;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_BITTER;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_BRAND_ID;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_CAN_ID;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_COLOR;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_DESCRIPTION;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_NAME_ID;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_SRCIMG;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.getVerietyCortegeById;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_BITTER;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_BRAND;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_COLOR;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_DESCRIPT;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_ID;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_NAME;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_POSITION;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_SIZE;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_SRCIMG;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_VOLUME;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_WEIGHT;
+import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.MEDF_TAG;
+import static jorje196.com.github.brewmaster.TopFragment.TOPF_TAG;
+
+public class MainBeerActivity extends Activity implements MaltExtDescriptionFragment.FragMaltLink {
+
+//    static final String ARG_FRAG_TAG = "fragTag";
     private ListView drawerList;    // списковое представление для drawer"а
     private DrawerLayout drawerLayout;
-    private SQLiteDatabase brewDb;
+    protected SQLiteDatabase brewDb;
     private Cursor cursor;
+
+    private int ChoosedId = 0;
+    private int numVerietiesInList = 0;
+    private int currentPositionInList = 0;
+    private String currentFragTag = TOPF_TAG;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,21 +104,23 @@ public class MainBeerActivity extends Activity {
           toast.show();
       }
 
-        // тестовая часть: выбираем все Coopers с 30 <= bitter <= 40
-        //ArrayList<String> bitterList ;
-        // bitterList = DbContract.DbVerieties.getVerietiesTextByBitterSpan(brewDb, "Coopers",28,43);
+     }
+    /* Реализация метода связи фрагмента MaltExt... с родительской активностью
+    (интерфейс MaltExtDescriptionFragment.FragMaltParams ) */
+     @Override
+     public void getFML(String tag, int id, int size, int position){
+        setCurrentPositionInList(position);
+        setNumVerietiesInList(size);
+        setChoosedId(id);
+        setCurrentFragTag(tag);
 
-      //  brewDb.close();
+        Fragment fragment = new MaltExtDescriptionFragment();
+        prepareMaltFragment(fragment, getChoosedId(), brewDb);
+        startFragment(fragment, getCurrentFragTag());
+         // ---------------------------------------
+        // TODO осле проверки перевести на set()
+     }
 
-        /* блок для отладки onCreate & onUpgrade
-        String strPath = brewDb.getPath();
-        int x;
-        if(deleteDatabase(strPath)) {
-            x = 1;
-        } else {
-            x = -1;
-        }   */
-    }
 
     // реализуем слушателя к выдвижному списку
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -95,31 +132,86 @@ public class MainBeerActivity extends Activity {
             selectItem(position, id);
         }
     }
+
     // Обработка выбранного пункта выдвижного списка
     private void selectItem(int position, long id){
-        Fragment fragment = null;  // ? new Fragment()
-        switch (position) {
+        Fragment fragment;
+        String fragTag;
+        // выбор фрагмента, передача ему параметров и запуск
+        switch ((int)id) {
             case 0 :
                 fragment = new TopFragment();
+                setCurrentFragTag(TOPF_TAG);
                 break;
             default : {
-                fragment = new TopFragment();
+                fragment = new MaltExtDescriptionFragment();
+                setCurrentPositionInList(0);
+                setChoosedId((int)id);
+                setCurrentFragTag(MEDF_TAG);
+
+                prepareMaltFragment(fragment, getChoosedId(), brewDb);
+
             }
         }
+
         // выводим фрагмент с исп транзакции фрагмента
+        startFragment(fragment, getCurrentFragTag());
+
+        drawerLayout.closeDrawer(drawerList); // закрывает выдвижную панель, связанную с drawerLayout
+
+    }
+    //  Метод выполняет стандартные шаги подготовки фраг. описания Malt
+    void prepareMaltFragment(Fragment fragment, int id, SQLiteDatabase db) {
+        ArrayList<String> stringId;
+        stringId = DbContract.DbVerieties.getVerietyIdByNameId(db, id);
+        setNumVerietiesInList(stringId.size());
+        String verietyId = stringId.get(getCurrentPositionInList());
+
+        // подготовка информации для передачи новому создаваемому фрагменту Malt
+        Bundle argBundle = prepareMaltInfo(db, verietyId );
+        putPropetiesToFMalt(argBundle);
+        fragment.setArguments(argBundle);
+    }
+    //  Метод выполняет стандартные шаги по активации фрагмента до ft.commit() включительно
+    void startFragment(Fragment fragment, String tag) {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.content_frame, fragment);
-        ft.addToBackStack(null);
+        ft.replace(R.id.content_frame, fragment, tag);
+        ft.addToBackStack(null);                // TODO может не копить фрагменты ?
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE );
         ft.commit();
 
+    }
+    /* Метод получает из Db информацию для отображения во фрагменте MaltExtDesc...
+    Обрабатывает её и готовит пакет к передаче . Можно и ArrayList, но читаемость ухудшается */
+    Bundle prepareMaltInfo(SQLiteDatabase db, String VerietyId) {
+        Bundle resultBundle = new Bundle();
+        ContentValues cortegeCV = getVerietyCortegeById(db, VerietyId);
+        resultBundle.putString(ARG_NAME, getName(db, cortegeCV.getAsInteger(COLUMN_VERIETIES_NAME_ID)));
+        resultBundle.putString(ARG_BRAND, getBrand(db, cortegeCV.getAsInteger(COLUMN_VERIETIES_BRAND_ID)));
+        resultBundle.putString(ARG_SRCIMG, cortegeCV.getAsString(COLUMN_VERIETIES_SRCIMG));
+        resultBundle.putString(ARG_DESCRIPT, cortegeCV.getAsString(COLUMN_VERIETIES_DESCRIPTION));
+        resultBundle.putInt(ARG_BITTER, cortegeCV.getAsInteger(COLUMN_VERIETIES_BITTER));
+        resultBundle.putInt(ARG_COLOR, cortegeCV.getAsInteger(COLUMN_VERIETIES_COLOR));
 
-        // тут что-то делаем, но надо закрыть выдвижную панель :
+        String canID = Integer.toString(cortegeCV.getAsInteger(COLUMN_VERIETIES_CAN_ID));
+        cortegeCV.clear();  // TODO надо ли ?
 
-        drawerLayout.closeDrawer(drawerList); // закрывает выдвижную панель, связанную с drawerLaayout
-
+        cortegeCV = getCanCortegeById(db, canID);
+        resultBundle.putDouble(ARG_VOLUME, cortegeCV.getAsDouble(COLUMN_CANS_VOLUME));
+        resultBundle.putDouble(ARG_WEIGHT, cortegeCV.getAsDouble(COLUMN_CANS_WEIGHT));
+        return resultBundle;
     }
 
+    // Прикрепляет к заданному Bundle параметры экземпляра
+    void putPropetiesToFMalt(Bundle argBundle) {
+        argBundle.putInt(ARG_ID, getChoosedId());
+        argBundle.putInt(ARG_SIZE, getNumVerietiesInList());
+        argBundle.putInt(ARG_POSITION,getCurrentPositionInList());
+    }
+
+
+
+//**************************************************************
     //для отображения меню на панели действий реализуем метод onCreateOptionsMenu()
     // элементы действий берем из файла ресурсов xml
     @Override
@@ -127,6 +219,22 @@ public class MainBeerActivity extends Activity {
         getMenuInflater().inflate(R.menu.menu_of_actions, menu);
         return super.onCreateOptionsMenu(menu);
     }
+
+    /* Обработка кликов на кнопках фрагмента Malt...
+    public int clkNext(View view) {
+        int i = 0;
+        switch(view.getId()){
+            case R.id.button_fmalt_next:
+                i++;
+                break;
+            case R.id.button_fmalt_prev:
+                i--;
+                break;
+        }
+
+        //i = MaltExtDescriptionFragment.getNumId();
+        return i;
+    } */
 
     // выполняется когда выбирается элемент на панели действий, получает объект MenuItem
     @Override
@@ -153,5 +261,30 @@ public class MainBeerActivity extends Activity {
         super.onDestroy();
         cursor.close();
         brewDb.close();
+    }
+    // геттеры и сеттеры
+    int getChoosedId() {
+        return ChoosedId;
+    }
+    void setChoosedId(int id){
+        ChoosedId = id;
+    }
+    int getNumVerietiesInList() {
+        return numVerietiesInList;
+    }
+    void setNumVerietiesInList(int size) {
+        numVerietiesInList = size;
+    }
+    int getCurrentPositionInList() {
+        return currentPositionInList;
+    }
+    void setCurrentPositionInList(int pos) {
+        currentPositionInList = pos;
+    }
+    String getCurrentFragTag() {
+        return currentFragTag;
+    }
+    void setCurrentFragTag(String tag) {
+        currentFragTag = tag;
     }
 }

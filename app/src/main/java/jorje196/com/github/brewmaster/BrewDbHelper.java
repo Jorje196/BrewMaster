@@ -47,7 +47,12 @@ class BrewDbHelper extends SQLiteOpenHelper {
             DbContract.DbNames.insertName(db, "Indian Pale Ale (IPA)");
             DbContract.DbNames.insertName(db, "English Bitter");
             DbContract.DbNames.insertName(db, "Wheat Beer");
-
+            DbContract.DbNames.insertName(db, "Preacher's Hefe Wheat");
+            DbContract.DbNames.insertName(db, "Australian Pale Ale");
+            DbContract.DbNames.insertName(db, "Canadian Blonde");
+            DbContract.DbNames.insertName(db, "European Lager");
+            DbContract.DbNames.insertName(db, "Mexican Cerveza");
+            DbContract.DbNames.insertName(db, "Irish Stout");
 
                 // бренды
             DbContract.DbBrands.insertBrand(db, "Coopers");
@@ -67,40 +72,79 @@ class BrewDbHelper extends SQLiteOpenHelper {
 
                 // банки
             DbContract.DbCans.insertCans(db, 1.7, 23.);
+            DbContract.DbCans.insertCans(db, 1.8, 23.);
+            DbContract.DbCans.insertCans(db, 1.5, 18.);
+
 
                 // итоговая (brand+name) таблица характеристик
             DbContract.DbVerieties.insertVerieties(db, "Draught", "Coopers",
-                    31, 10,
-                    "http://www.coopersbeer.ru/draught_with-.jpg",
+                    420, 130, 1, "draught_small",
+                    "http://store.coopers.com.au/draught-1-7kg.html",
+                    "Светлое слабо горькое , скорее летнее, рыба, белая птица");
+            DbContract.DbVerieties.insertVerieties(db, "Draught", "Muntons",
+                    420, 130, 2, "draught_small",
+                    "http://store.coopers.com.au/draught-1-7kg.html",
+                    "Светлое слабо горькое , скорее летнее, рыба, белая птица");
+            DbContract.DbVerieties.insertVerieties(db, "Draught", "Finlandia",
+                    420, 130, 3, "draught_small",
+                    "http://store.coopers.com.au/draught-1-7kg.html",
                     "Светлое слабо горькое , скорее летнее, рыба, белая птица");
             DbContract.DbVerieties.insertVerieties(db, "Lager", "Coopers",
-                    29, 7,
-                    "http://www.coopersbeer.ru/LAGER.jpg",
+                    390, 75, 1, "lager_small",
+                    "http://store.coopers.com.au/lager-1-7kg.html",
                     "Очень светлое слабо горькое , летнее, рыба, белая птица");
             DbContract.DbVerieties.insertVerieties(db, "English Bitter", "Coopers",
-                    43, 31,
-                    "http://www.coopersbeer.ru/imgs/beer/s_english_bitter.jpg",
+                    620, 420, 1, "english_bitter_small",
+                    "http://store.coopers.com.au/english-bitter-1-7kg.html",
                     "Горькое, универсальное по сезону, ближе к мясу с соответствующими соусами и гарниром");
             DbContract.DbVerieties.insertVerieties(db, "Real Ale", "Coopers",
-                    41, 17,
-                    "http://www.coopersbeer.ru/real-ale_.jpg",
+                    560, 230, 1, "real_ale_small",
+                    "http://store.coopers.com.au/real-ale-1-7kg.html",
                     "Среднее горьковатое , универсальное по сезону, мясо, птица");
             DbContract.DbVerieties.insertVerieties(db, "Dark Ale", "Coopers",
-                    43, 48,
-                    "http://www.coopersbeer.ru/diy-dark-ale_with-glass_1450063652.jpg",
+                    590, 650, 1, "dark_ale_small",
+                    "http://store.coopers.com.au/dark-ale.html",
                     "Горькое, темное, универсальное по сезону, но приятнее зимой и к мясу ");
             DbContract.DbVerieties.insertVerieties(db, "Stout", "Coopers",
-                    52, 133,
-                    "http://www.coopersbeer.ru/diy-stout_.jpg",
+                    710, 1800, 1, "stout_small",
+                    "http://store.coopers.com.au/stout-1-7kg.html",
                     "Стаут, универсальное по сезону, но особенно хорош зимним вечером ");
             DbContract.DbVerieties.insertVerieties(db, "Indian Pale Ale (IPA)", "Coopers",
-                    62, 17,
-                    "http://www.coopersbeer.ru/brew_glass_ipa_.jpg",
+                    830, 230, 1, "brew_a_ipa_small",
+                    "http://store.coopers.com.au/thomas-coopers-brew-a-ipa-1-7kg.html",
                     "Горькое, самодостаточное в любое время года, если к мясу, то на гриле");
             DbContract.DbVerieties.insertVerieties(db, "Wheat Beer", "Muntons",
-                    30, 8,
+                    30, 8, 1, "mexican_cerveza_small",
                     "http://www.muntonshomebrew.com/wp-content/uploads/2012/09/connoisseur_wheat_beer.jpg",
                     "Пшеничное, скорее летнее, самодостаточно, на любителя белая птица");
+            DbContract.DbVerieties.insertVerieties(db, "Preacher's Hefe Wheat", "Coopers",
+                    340, 65, 1, "preacher_s_hefe_wheat_small",
+                    "http://store.coopers.com.au/thomas-coopers-preacher-s-hefe-wheat-1-7kg.html",
+                    "Пшеничное, скорее летнее, самодостаточно, на любителя белая птица и пряности");
+            DbContract.DbVerieties.insertVerieties(db, "Australian Pale Ale", "Coopers",
+                    340, 90, 1, "australian_pale_ale_small",
+                    "http://store.coopers.com.au/australian-pale-ale-1-7kg.html",
+                    "Светлое, скорее летнее, средней горечи, хорошо уживается с любым темным мясом");
+            DbContract.DbVerieties.insertVerieties(db, "Canadian Blonde", "Coopers",
+                    420, 55, 1, "canadian_blonde_small",
+                    "http://store.coopers.com.au/canadian-blonde-1-7kg.html",
+                    "светлое, скорее летнее, средней горечи, хорошо уживается с любым темным мясом");
+            DbContract.DbVerieties.insertVerieties(db, "European Lager", "Coopers",
+                    340, 90, 1, "european_lager_small",
+                    "http://store.coopers.com.au/european-lager-1-7kg.html",
+                    "светлое, скорее летнее, средней горечи, предпочтительно к рыбе или птице");
+            DbContract.DbVerieties.insertVerieties(db, "Mexican Cerveza", "Coopers",
+                    420, 53, 1, "mexican_cerveza_small",
+                    "http://store.coopers.com.au/mexican-cerveza-1-7kg.html",
+                    "светлое, летнее, средней горечи со сладковатым привкусом, хорошо сочетается с " +
+                            "'острыми' блюдами");
+            DbContract.DbVerieties.insertVerieties(db, "Irish Stout", "Coopers",
+                    560, 1650, 1, "irish_stout_small",
+                    "http://store.coopers.com.au/irish-stout-1-7kg.html",
+                    "очень темое, абсолютно самодостаточно, хорошо сочетается с " +
+                            "холодными зимними вечерами, промозглая погода тоже подходит. " +
+                            "но употреблять строго во второй половине дня !");
+
             // TODO может длинные вынести в string-ресурс ?
 
                 // варки

@@ -14,7 +14,7 @@ import android.widget.TextView;
  *  TODO тут ли его место ?
  */
 public class TopFragment extends Fragment {
-
+    static final String TOPF_TAG = "topFragment";    // тег фрагмента
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         //return super.onCreateView(inflater, container, savedInstanceState);
