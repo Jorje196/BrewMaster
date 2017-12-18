@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
+<!--  TODO добавить горизонтальную ориентацию-->
     <ImageView
         android:id="@+id/malt_imageView"
         android:layout_width="220dp"
@@ -14,9 +14,8 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-
         app:layout_constraintVertical_bias="0.1"
-        android:src="@drawable/_86_days_pilsner_small"/>
+        />
 
     <TextView
         android:id="@+id/malt_veriety"
@@ -35,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        app:layout_constraintRight_toRightOf="parent"
+        android:paddingStart="15dp"
         app:layout_constraintLeft_toLeftOf="parent"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@+id/malt_veriety"
