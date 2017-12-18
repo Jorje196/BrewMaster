@@ -3,7 +3,9 @@ package jorje196.com.github.brewmaster;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 
@@ -19,19 +21,187 @@ import static android.database.Cursor.FIELD_TYPE_STRING;
 public final class DbContract {
 
     public DbContract() {
-    } // Во избежание создания объектов пустой
+    } // Во избежание создания объектов конструктор пустой
 
+    public static final String DB_NAME = "brewDb";
     // определение общих для таблиц констант
     static final String CREATE_TABLE = "CREATE TABLE ";
     static final String _ID_IPKA = "_id INTEGER PRIMARY KEY AUTOINCREMENT";
     static final String TYPE_INT = " INTEGER";
     static final String TYPE_TEXT = " TEXT";
-    //static final String TYPE_REAL = " REAL";
+    static final String TYPE_REAL = " REAL";
     static final String NOT_DEFINED_TYPE = " N/A ";
+    static final String NOT_DEFINED_DATA = "n/a";
+    static final String NOT_NULL = " NOT NULL";
+
     static final String _COM = ", ";  // comma
     // static final String _SPB = " ";  // spacebar
-    static final int BUFFER_STRING_SIZE = 200;  // description может быть длинным !
+    static final int BUFFER_STRING_SIZE = 400;  // description может быть длинным !
 
+    // *** Вложенный (nested) класс для таблицы Brews
+    static abstract class DbBrews implements BaseColumns {
+        static final String TABLE_BREWS = "brews";
+        static final String COLUMN_BREWS_ID = "_id";
+        static final String COLUMN_BREWS_VERIETY_ID = "veriety_id";
+        static final String COLUMN_BREWS_VOLUME = "volume";     // по факту
+        static final String COLUMN_BREWS_START_DATA = "st_data";
+        static final String COLUMN_BREWS_START_GRAVITY = "st_gravity";
+        static final String COLUMN_BREWS_START_WORT_TEMP = "st_temp";
+        static final String COLUMN_BREWS_FINAL_GRAVITY = "fn_gravity";
+        static final String COLUMN_BREWS_FINAL_TEMP = "fn_temp";
+        static final String COLUMN_BREWS_BOTTLED_DATA = "btl_data";
+        static final String COLUMN_BREWS_ALC_PERCENT = "alco_persent";
+        static final String COLUMN_BREWS_SECOND_FERMENT_DATA = "fn_second_ferm";
+        static final String COLUMN_BREWS_PROCESS_COMPLETE = "flag_process_complete";
+        static final String COLUMN_BREWS_SUGAR = "sugar";
+        static final String COLUMN_BREWS_DEXTROSE = "dextrose";
+        static final String COLUMN_BREWS_THICKENERS = "thickeners";
+        static final String COLUMN_BREWS_THICK_WEIGHT = "thick_weight";
+        static final String COLUMN_BREWS_ENHANCERS = "enhancers";
+        static final String COLUMN_BREWS_ENHANCERS_WEIGHT = "enhanc_weight";
+        static final String COLUMN_BREWS_NOTES = "notes";
+
+        static final String[][] MT_BREWS_COLUMNS_TYPES = {{COLUMN_BREWS_ID, TYPE_INT,},
+            {COLUMN_BREWS_VERIETY_ID, TYPE_INT, NOT_NULL},
+            {COLUMN_BREWS_VOLUME, TYPE_REAL},
+            {COLUMN_BREWS_START_DATA, TYPE_TEXT}, {COLUMN_BREWS_START_GRAVITY, TYPE_REAL},
+            {COLUMN_BREWS_START_WORT_TEMP, TYPE_INT}, {COLUMN_BREWS_FINAL_GRAVITY, TYPE_REAL},
+            {COLUMN_BREWS_FINAL_TEMP, TYPE_INT}, {COLUMN_BREWS_BOTTLED_DATA, TYPE_TEXT},
+            {COLUMN_BREWS_ALC_PERCENT, TYPE_REAL}, {COLUMN_BREWS_SECOND_FERMENT_DATA, TYPE_TEXT},
+            {COLUMN_BREWS_PROCESS_COMPLETE, TYPE_INT}, {COLUMN_BREWS_SUGAR, TYPE_REAL},
+            {COLUMN_BREWS_DEXTROSE, TYPE_REAL},
+            {COLUMN_BREWS_THICKENERS, TYPE_INT}, {COLUMN_BREWS_THICK_WEIGHT, TYPE_REAL},
+            {COLUMN_BREWS_ENHANCERS, TYPE_INT}, {COLUMN_BREWS_ENHANCERS_WEIGHT, TYPE_REAL},
+            {COLUMN_BREWS_NOTES, TYPE_TEXT}};
+
+        static final String CREATE_TABLE_BREWS = CREATE_TABLE + TABLE_BREWS + "(" + _ID_IPKA +
+            getInitString(MT_BREWS_COLUMNS_TYPES) + _COM +
+                "FOREIGN KEY (" + COLUMN_BREWS_VERIETY_ID + ") " + "REFERENCES " +
+                DbVerieties.TABLE_VERIETIES + "(" + DbVerieties.COLUMN_VERIETIES_ID + ")" +
+                _COM + "FOREIGN KEY (" + COLUMN_BREWS_THICKENERS + ") " + "REFERENCES " +
+                DbThickeners.TABLE_THICKENERS + "(" + DbThickeners.COLUMN_THICKENERS_ID + ")" +
+                _COM + "FOREIGN KEY (" + COLUMN_BREWS_ENHANCERS + ") " + "REFERENCES " +
+                DbEnhancers.TABLE_ENHANCERS + "(" + DbEnhancers.COLUMN_ENHANCERS_ID + ")" +
+                ")";
+
+        static long insertBrews(SQLiteDatabase db, int veriety, double volume, String startDataT,
+            double startGravity, int startTemp, double finalGravity) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_BREWS_VERIETY_ID, veriety);
+            values.put(COLUMN_BREWS_VOLUME, volume);
+            values.put(COLUMN_BREWS_START_DATA, startDataT);
+            values.put(COLUMN_BREWS_START_GRAVITY, startGravity);
+            values.put(COLUMN_BREWS_START_WORT_TEMP, startTemp);
+            values.put(COLUMN_BREWS_FINAL_GRAVITY, finalGravity);
+
+            return insertTable(db, TABLE_BREWS, values);
+        }
+        // TODO добавить необходимый набор set & get
+        // TODO ДОБАВИТЬ СТРОКУ ОГРАНИЧИТЕЛЕЙ СТОЛБЦА И ИХ ОБРАБОТКУ
+    }
+
+
+
+    // *** Вложенный (nested) класс для таблицы Cans
+    static abstract class DbCans implements BaseColumns {
+        static final String TABLE_CANS = "cans";
+        static final String COLUMN_CANS_ID = "_id";
+        static final String COLUMN_CANS_WEIGHT = "weight";  // вес охмеленного экстракта
+        static final String COLUMN_CANS_VOLUME = "volume";  // рекомендованный объем, справочное значение
+        // некоторая избыточность по коду при работе с REAL имеет место преднамеренно
+        static final String CREATE_TABLE_CANS = CREATE_TABLE + TABLE_CANS +
+                "(" + _ID_IPKA + _COM + COLUMN_CANS_WEIGHT + TYPE_REAL + _COM +
+        COLUMN_CANS_VOLUME + TYPE_REAL + ")";
+        // Добавление записи в таблицу
+        static long insertCans(SQLiteDatabase db, double weight, double volume) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_CANS_WEIGHT, weight);
+            values.put(COLUMN_CANS_VOLUME, volume);
+            return insertTable(db, TABLE_CANS, values);
+        }
+        // Получение id
+        static int getCanId(SQLiteDatabase db, double weight, double volume) {
+            return getCanId(db, Double.toString(weight), Double.toString(volume));
+        }
+        static int getCanId(SQLiteDatabase db, String weight, String volume) {
+            String columnInf = COLUMN_CANS_WEIGHT + "=?  AND " + COLUMN_CANS_VOLUME + "=? ";
+            return Integer.parseInt(getCells(db, TABLE_CANS,COLUMN_CANS_ID, columnInf, new String[]{weight, volume}).get(0));
+        }
+
+        // Получение weight по id (String)
+        static String getCanWeight(SQLiteDatabase db, String canID) {
+            return getCellSimple(db, TABLE_CANS, COLUMN_CANS_WEIGHT, COLUMN_CANS_ID, canID);
+        }
+        // Получение weight по id (int)
+        static String getCanWeight(SQLiteDatabase db, int canID) {
+            return getCanWeight(db, Integer.toString(canID));
+        }
+        // Получение volume по id (String)
+        static String getCanVolume(SQLiteDatabase db, String canID) {
+            return getCellSimple(db, TABLE_CANS, COLUMN_CANS_VOLUME, COLUMN_CANS_ID, canID);
+        }
+        // Получение volume по id (int)
+        static String getCanVolume(SQLiteDatabase db, int canID) {
+            return getCanVolume(db, Integer.toString(canID));
+        }
+        // Получение кортежа из таблицы Cans по заданному Id
+        public static ContentValues getCanCortegeById (SQLiteDatabase db, String Id){
+            return getSelectColumnsByFilter(db, TABLE_CANS,
+            null, COLUMN_CANS_ID + " = ?", new String[] {Id}, null) .get(0);
+        }
+    }
+
+
+    // *** Вложенный (nested) класс для таблицы Thickeners
+    static abstract class DbThickeners implements BaseColumns {
+        static final String TABLE_THICKENERS = "thickeners";
+        static final String COLUMN_THICKENERS_ID = "_id";
+        static final String COLUMN_THICKENERS_NAME = "name";
+        static final String CREATE_TABLE_THICKENERS = CREATE_TABLE + TABLE_THICKENERS +
+                "(" + _ID_IPKA + _COM + COLUMN_THICKENERS_NAME + TYPE_TEXT + ")";
+        // Добавление записи в таблицу
+        static long insertThickener(SQLiteDatabase db, String thickener) {
+            return insertSimpeTable(db, TABLE_THICKENERS, COLUMN_THICKENERS_NAME, thickener);
+        }
+        // Получение id по названию
+        static int getThickenerId(SQLiteDatabase db, String thickener) {
+            return Integer.parseInt(getCellSimple(db, TABLE_THICKENERS, COLUMN_THICKENERS_ID, COLUMN_THICKENERS_NAME, thickener));
+        }
+        // Получение thickener по id (String)
+        static String getThickener(SQLiteDatabase db, String thickenerID) {
+            return getCellSimple(db, TABLE_THICKENERS, COLUMN_THICKENERS_NAME, COLUMN_THICKENERS_ID, thickenerID);
+        }
+        // Получение thickener по id (int)
+        static String getThickener(SQLiteDatabase db, int thickenerID) {
+            return getThickener(db, Integer.toString(thickenerID));
+        }
+    }
+
+    // *** Вложенный (nested) класс для таблицы Enhancers
+    static abstract class DbEnhancers implements BaseColumns {
+        static final String TABLE_ENHANCERS = "enhancers";
+        static final String COLUMN_ENHANCERS_ID = "_id";
+        static final String COLUMN_ENHANCERS_NAME = "name";
+        static final String CREATE_TABLE_ENHANCERS = CREATE_TABLE + TABLE_ENHANCERS +
+                "(" + _ID_IPKA + _COM + COLUMN_ENHANCERS_NAME + TYPE_TEXT + ")";
+
+        // Добавление записи в таблицу
+        static long insertEnhancer(SQLiteDatabase db, String enhancer) {
+            return insertSimpeTable(db, TABLE_ENHANCERS, COLUMN_ENHANCERS_NAME, enhancer);
+        }
+        // Получение id по названию
+        static int getEnhancerId(SQLiteDatabase db, String enhancer) {
+            return Integer.parseInt(getCellSimple(db, TABLE_ENHANCERS, COLUMN_ENHANCERS_ID, COLUMN_ENHANCERS_NAME, enhancer));
+        }
+        // Получение enhancer по id (String)
+        static String getEnhancer(SQLiteDatabase db, String enhancerID) {
+            return getCellSimple(db, TABLE_ENHANCERS, COLUMN_ENHANCERS_NAME, COLUMN_ENHANCERS_ID, enhancerID);
+        }
+        // Получение enhancer по id (int)
+        static String getEnhancer(SQLiteDatabase db, int enhancerID) {
+            return getEnhancer(db, Integer.toString(enhancerID));
+        }
+    }
 
     // *** Вложенный (nested) класс для таблицы Names
     static abstract class DbNames implements BaseColumns {
@@ -42,16 +212,16 @@ public final class DbContract {
                 "(" + _ID_IPKA + _COM + COLUMN_NAMES_NAME + TYPE_TEXT + ")";
 
         // Добавление записи в таблицу
-        static void insertName(SQLiteDatabase db, String name) {
-            insertSimpeTable(db, TABLE_NAMES, COLUMN_NAMES_NAME, name);
+        static long insertName(SQLiteDatabase db, String name) {
+            return insertSimpeTable(db, TABLE_NAMES, COLUMN_NAMES_NAME, name);
         }
 
         // Получение данных из таблицы
-        static String getName(SQLiteDatabase db, int nameID) {
+        public static String getName(SQLiteDatabase db, int nameID) {
             String strNameID = Integer.toString(nameID);
             return getCellSimple(db, TABLE_NAMES, COLUMN_NAMES_NAME, COLUMN_NAMES_ID, strNameID);
         }
-        static String getName(SQLiteDatabase db, String nameID) {
+        public static String getName(SQLiteDatabase db, String nameID) {
             return getCellSimple(db, TABLE_NAMES, COLUMN_NAMES_NAME, COLUMN_NAMES_ID, nameID);
         }
 
@@ -69,12 +239,12 @@ public final class DbContract {
                 "(" + _ID_IPKA + _COM + COLUMN_BRANDS_BRAND + TYPE_TEXT + ")";
 
         // Добавление записи в таблицу
-        static void insertBrand(SQLiteDatabase db, String brand) {
-            insertSimpeTable(db, TABLE_BRANDS, COLUMN_BRANDS_BRAND, brand);
+        static long insertBrand(SQLiteDatabase db, String brand) {
+            return insertSimpeTable(db, TABLE_BRANDS, COLUMN_BRANDS_BRAND, brand);
         }
 
         // Получение данных из таблицы
-        static String getBrand(SQLiteDatabase db, int brandID) {
+        public static String getBrand(SQLiteDatabase db, int brandID) {
             String strBrandID = Integer.toString(brandID);
             return getCellSimple(db, TABLE_BRANDS, COLUMN_BRANDS_BRAND, COLUMN_BRANDS_ID, strBrandID);
         }
@@ -96,51 +266,48 @@ public final class DbContract {
         static final String COLUMN_VERIETIES_BRAND_ID = "brand_id";
         static final String COLUMN_VERIETIES_BITTER = "bitter";
         static final String COLUMN_VERIETIES_COLOR = "color";
+        static final String COLUMN_VERIETIES_CAN_ID = "can_id";
+        static final String COLUMN_VERIETIES_SRCIMG = "src_img";
         static final String COLUMN_VERIETIES_HREFIMG = "href_img";
         static final String COLUMN_VERIETIES_DESCRIPTION = "description";
         // метатаблица типов
-        static final String[][] MT_VERIETIES_TYPES =
-            {{COLUMN_VERIETIES_NAME_ID, COLUMN_VERIETIES_BRAND_ID, COLUMN_VERIETIES_BITTER,
-                    COLUMN_VERIETIES_COLOR, COLUMN_VERIETIES_HREFIMG, COLUMN_VERIETIES_DESCRIPTION},
-             {TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_TEXT, TYPE_TEXT}};
+        static final String[][] MT_VERIETIES_COLUMNS_TYPES = {{COLUMN_VERIETIES_ID, TYPE_INT},
+            {COLUMN_VERIETIES_NAME_ID, TYPE_INT}, {COLUMN_VERIETIES_BRAND_ID, TYPE_INT},
+            {COLUMN_VERIETIES_BITTER, TYPE_INT}, {COLUMN_VERIETIES_COLOR, TYPE_INT},
+            {COLUMN_VERIETIES_CAN_ID, TYPE_INT}, {COLUMN_VERIETIES_SRCIMG, TYPE_TEXT},
+            {COLUMN_VERIETIES_HREFIMG, TYPE_TEXT}, {COLUMN_VERIETIES_DESCRIPTION, TYPE_TEXT}};
 
         static final String CREATE_TABLE_VERIETIES = CREATE_TABLE + TABLE_VERIETIES +
-                "(" + _ID_IPKA + _COM + COLUMN_VERIETIES_NAME_ID + TYPE_INT + _COM +
-                COLUMN_VERIETIES_BRAND_ID + TYPE_INT + _COM +
-                COLUMN_VERIETIES_BITTER + TYPE_INT + _COM +
-                COLUMN_VERIETIES_COLOR + TYPE_INT + _COM +
-                COLUMN_VERIETIES_HREFIMG + TYPE_TEXT + _COM +
-                COLUMN_VERIETIES_DESCRIPTION + TYPE_TEXT + _COM +
+                "(" + _ID_IPKA + getInitString(MT_VERIETIES_COLUMNS_TYPES) + _COM +
                 "FOREIGN KEY (" + COLUMN_VERIETIES_NAME_ID + ") " +
                 "REFERENCES " + DbNames.TABLE_NAMES + "(" + DbNames.COLUMN_NAMES_ID + ")" + _COM +
                 "FOREIGN KEY (" + COLUMN_VERIETIES_BRAND_ID + ") " +
-                "REFERENCES " + DbBrands.TABLE_BRANDS + "(" + DbBrands.COLUMN_BRANDS_ID + "))";
+                "REFERENCES " + DbBrands.TABLE_BRANDS + "(" + DbBrands.COLUMN_BRANDS_ID + ")" + _COM +
+                "FOREIGN KEY (" + COLUMN_VERIETIES_CAN_ID + ") " +
+                "REFERENCES " + DbCans.TABLE_CANS + "(" + DbCans.COLUMN_CANS_ID + "))";
 
         // Добавление записи в таблицу
-        static void insertVerieties(SQLiteDatabase db, String name, String brand, String bitter,
-                                    String color, String refImg, String description) {
-            int bitterInt = DbNames.getNameId(db, bitter);
-            int colorInt = DbBrands.getBrandId(db, color);
-            insertVerieties(db, name, brand, bitterInt, colorInt, refImg, description);
-        }
-        static void insertVerieties(SQLiteDatabase db, String name, String brand, int bitter,
-                                    int color, String refImg, String description) {
+        static long insertVerieties(SQLiteDatabase db, String name, String brand, int bitter,
+            int color, int canID, String srcImg, String refImg, String description) {
             int nameID = DbNames.getNameId(db, name);
             int brandID = DbBrands.getBrandId(db, brand);
-            insertVerieties(db, nameID, brandID, bitter, color, refImg, description);
+            return insertVerieties(db, nameID, brandID, bitter, color, canID, srcImg, refImg, description);
         }
-        static void insertVerieties(SQLiteDatabase db, int nameID, int brandID, int bitter,
-                                    int color, String refImg, String description) {
+        static long insertVerieties(SQLiteDatabase db, int nameID, int brandID, int bitter,
+            int color, int canID, String srcImg, String refImg, String description) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_VERIETIES_NAME_ID, nameID);
             values.put(COLUMN_VERIETIES_BRAND_ID, brandID);
             values.put(COLUMN_VERIETIES_BITTER,bitter);
             values.put(COLUMN_VERIETIES_COLOR,color);
+            values.put(COLUMN_VERIETIES_CAN_ID,canID);
+            values.put(COLUMN_VERIETIES_SRCIMG,srcImg);
             values.put(COLUMN_VERIETIES_HREFIMG,refImg);
             values.put(COLUMN_VERIETIES_DESCRIPTION,description);
-            insertTable(db, TABLE_VERIETIES, values);
+            return insertTable(db, TABLE_VERIETIES, values);
         }
         // Получение данных из таблицы
+
         // Получение всех name (+ brand) заданного бренда brand с горькостью из диапазона [bitterMin,bitterMax]
         static ArrayList<String> getVerietiesNameByBitterSpan(SQLiteDatabase db, String brand, int bitterMin, int bitterMax) {
             String columnLF = COLUMN_VERIETIES_NAME_ID;
@@ -153,7 +320,15 @@ public final class DbContract {
             }
             return result;
         }
-        // Получение всех колонок кроме ссылки на img для всех Coopers, чей bitter = [31... 43]
+
+        // Получение кортежа из таблицы Verieties по заданному Id
+        public static ContentValues getVerietyCortegeById (SQLiteDatabase db, String Id) {
+
+        return getSelectColumnsByFilter(db, TABLE_VERIETIES,
+            null, COLUMN_VERIETIES_ID + " = ?", new String[] {Id}, null) .get(0);
+        }
+
+        // Получение всех колонок кроме ссылки на img для всех Coopers, чей bitter = [bitterMin...bitterMax]
         static ArrayList<String> getVerietiesTextByBitterSpan(SQLiteDatabase db, String brand, int bitterMin, int bitterMax){
             String[] columnLF = {COLUMN_VERIETIES_NAME_ID, COLUMN_VERIETIES_BRAND_ID, COLUMN_VERIETIES_BITTER,
                     COLUMN_VERIETIES_COLOR, COLUMN_VERIETIES_DESCRIPTION};
@@ -191,8 +366,11 @@ public final class DbContract {
             }
             return result;
         }
-
-
+        // Получение списка id кортежей, содержащих выбранное название
+        static ArrayList<String> getVerietyIdByNameId (SQLiteDatabase db, long nameId) {
+            String columnInf = COLUMN_VERIETIES_NAME_ID + "=? ";
+            return getCells(db, TABLE_VERIETIES, COLUMN_VERIETIES_ID, columnInf, new String[] {Long.toString(nameId)});
+        }
     }
 
 
@@ -201,6 +379,14 @@ public final class DbContract {
     // *** Блок методов получения данных из таблиц
 
     // Применение различных вариантов для разных задач (местами ради чистого знания).
+    @NonNull
+    private static String getInitString(String[][] metaData) {
+        StringBuffer result = new StringBuffer(BUFFER_STRING_SIZE);
+        for (int i=1; i< metaData.length; i++) {
+            result.append(" ,").append(metaData[i][0]).append(metaData[i][1]);
+        }
+        return result.toString();
+        }
 
     // Получение выбранных колонок заданной таблицы , удовлетворяющих условиям, определенным
     // в запросе, с сохранением "родных" колонкам типов
@@ -220,7 +406,7 @@ public final class DbContract {
                                 resultRow.put(columnName, cursor.getInt(columnNum));
                                 break;
                             case FIELD_TYPE_FLOAT:
-                                resultRow.put(columnName, cursor.getFloat(columnNum));
+                                resultRow.put(columnName, cursor.getDouble(columnNum));
                                 break;
                             case FIELD_TYPE_STRING:
                                 resultRow.put(columnName, cursor.getString(columnNum));
@@ -253,7 +439,7 @@ public final class DbContract {
                         result.add(Integer.toString(cursor.getInt(columnNum)));
                         break;
                     case FIELD_TYPE_FLOAT:
-                        result.add(Float.toString(cursor.getFloat(columnNum)));
+                        result.add(Double.toString(cursor.getDouble(columnNum)));
                         break;
                     case FIELD_TYPE_STRING:
                         result.add(cursor.getString(columnNum));
@@ -266,7 +452,7 @@ public final class DbContract {
         cursor.close();
         return result;
     }
-    // выборка единственнй ячейки по условию в одной колонке (типа имя по id или наоборот
+    // выборка единственнй ячейки по условию в одной строке (типа имя по id или наоборот
     private static String getCellSimple(SQLiteDatabase db, String tableName, String columnLF, String columnInf, String strInf) {
         String result = null;
         String limit = "1";
@@ -282,7 +468,7 @@ public final class DbContract {
                     result = Integer.toString(cursor.getInt(columnNum));
                     break;
                 case FIELD_TYPE_FLOAT:
-                    result = Float.toString(cursor.getFloat(columnNum));
+                    result = Double.toString(cursor.getDouble(columnNum));
                     break;
                 case FIELD_TYPE_STRING:
                     result = cursor.getString(columnNum);
@@ -297,22 +483,25 @@ public final class DbContract {
     /*  ****** Блок общих методов insert  */
 
     // метод insert для простых (два столбца: _id , info) таблиц
-    private static void insertSimpeTable(SQLiteDatabase db, String tableName, String columnName, String cellValue) {
+    private static long insertSimpeTable(SQLiteDatabase db, String tableName, String columnName, String cellValue) {
         ContentValues rowValues = new ContentValues();
         rowValues.put(columnName, cellValue);
-        db.insert(tableName, null, rowValues);
+        return db.insert(tableName, null, rowValues);
     }
 
     //  метод insert для непростых (>2 столбцов) таблиц
     private static long insertTable (SQLiteDatabase db, String tableName,ContentValues rowValues){
+        long il = 0;
         try {
-            return db.insertOrThrow(tableName, null, rowValues);
+            il = db.insert(tableName, null, rowValues);
+
         //    res++;
-        } catch(Exception e) {
+        } catch(SQLiteException e) {
            // "SQLiteDb TABLE " + tableName + " insert fault";
+            // TODO доработать Exception
 
         }
-        return (-1);
+        return il;
     }
 
 
