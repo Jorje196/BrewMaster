@@ -12,8 +12,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-
 /**
  * Created by User on 30.11.2017.
  * Фрагмент с описанием охмеленного экстракта

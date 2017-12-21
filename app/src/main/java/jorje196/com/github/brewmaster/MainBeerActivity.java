@@ -3,6 +3,7 @@ package jorje196.com.github.brewmaster;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.ListFragment;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 
 import java.util.Locale;
 
+import static jorje196.com.github.brewmaster.BrewListFragment.BLF_TAG;
 import static jorje196.com.github.brewmaster.DbContract.DbBrands.getBrand;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_VOLUME;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_WEIGHT;
@@ -84,13 +86,11 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
                 android.R.layout.simple_list_item_1, cursor, new String[]{DbContract.DbNames.COLUMN_NAMES_NAME},
                     new int[]{android.R.id.text1}, 0);
 
-             // массив строк из ресурса
-              //    planetsArray = getResources().getStringArray(R.array.planets_array);
               // ссылка на списочное представление из реса
             drawerList = (ListView) findViewById(R.id.drawer);
               // получить ссылку на drawerLayout
             drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-              // связываем списочное представление с массивом строк через адаптор
+              // связываем списочное представление с источником строк через адаптор
             //drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, planetsArray));
             drawerList.setAdapter(dbAdapter);
               // создаем экземпляр для слушателя спискового представления
@@ -220,21 +220,6 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         return super.onCreateOptionsMenu(menu);
     }
 
-    /* Обработка кликов на кнопках фрагмента Malt...
-    public int clkNext(View view) {
-        int i = 0;
-        switch(view.getId()){
-            case R.id.button_fmalt_next:
-                i++;
-                break;
-            case R.id.button_fmalt_prev:
-                i--;
-                break;
-        }
-
-        //i = MaltExtDescriptionFragment.getNumId();
-        return i;
-    } */
 
     // выполняется когда выбирается элемент на панели действий, получает объект MenuItem
     @Override
@@ -243,6 +228,9 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             case R.id.action_search:
                 return true;
             case R.id.action_brew_list:
+                // Формируем и отоббражаем фрагмент оо списком варок
+                BrewListFragment brewListFragment= new BrewListFragment();
+                startFragment(brewListFragment, BLF_TAG);
                 return true;
             case R.id.action_edit_brew:
                 return true;
