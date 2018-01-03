@@ -50,7 +50,7 @@ public  class BrewListFragment extends ListFragment {
     static final String TEXT_VIEW2_STR = "brewListView2";
     static final String TEXT_VIEW3_STR = "brewListView3";
     static final String TEXT_VIEW4_STR = "brewListView4";
-
+        // Сокращения имен таблиц для текста запроса
     static final String TBD = TABLE_BRANDS + ".";
     static final String TBW = TABLE_BREWS + ".";
     static final String TCN = TABLE_CANS + ".";
@@ -59,25 +59,6 @@ public  class BrewListFragment extends ListFragment {
     static final String TST = TABLE_STATES + ".";
 
         // Строка SQL-запроса формирования курсора для работы с фрагментом списка
-        static final String SQL_BREW_LIST2 = "SELECT " + TABLE_BREWS + _PNT + COLUMN_BREWS_ID  + _COM +
-                TABLE_BREWS + _PNT + COLUMN_BREWS_START_DATA  + " AS " + TEXT_VIEW1_STR + _COM +
-                " ( " + TABLE_NAMES + _PNT + COLUMN_NAMES_NAME + "||'   '||" +
-                TABLE_BRANDS + _PNT + COLUMN_BRANDS_BRAND + " ) AS " + TEXT_VIEW2_STR + _COM +
-                " (" + " 'Output ' ||" + TABLE_BREWS + _PNT + COLUMN_BREWS_VOLUME + "||  'л   Alc ' ||" +
-                TABLE_BREWS + _PNT + COLUMN_BREWS_ALC_PERCENT + "||  ' %об.    Bitt ' ||" + "CAST(ROUND" +
-                "(" + TABLE_VERIETIES + _PNT + COLUMN_VERIETIES_BITTER +
-                "*" +  TABLE_CANS + _PNT + COLUMN_CANS_WEIGHT + "/" + TABLE_BREWS + _PNT + COLUMN_BREWS_VOLUME + ", 0) AS INTEGER)" +
-                ") AS " + TEXT_VIEW3_STR + _COM +
-                TABLE_STATES + _PNT + COLUMN_STATES_TEXT  + " AS " + TEXT_VIEW4_STR +
-                " FROM " +
-                TABLE_BREWS +_COM + TABLE_VERIETIES + _COM + TABLE_BRANDS + _COM + TABLE_NAMES + _COM +
-                TABLE_STATES + _COM + TABLE_CANS +
-                " WHERE " +
-                TABLE_BREWS + _PNT + COLUMN_BREWS_VERIETY_ID + "=" + TABLE_VERIETIES + _PNT + COLUMN_VERIETIES_ID + " AND " +
-                TABLE_VERIETIES + _PNT + COLUMN_VERIETIES_BRAND_ID + "=" + TABLE_BRANDS + _PNT + COLUMN_BRANDS_ID + " AND " +
-                TABLE_VERIETIES + _PNT + COLUMN_VERIETIES_NAME_ID + "=" + TABLE_NAMES + _PNT + COLUMN_NAMES_ID + " AND " +
-                TABLE_VERIETIES + _PNT + COLUMN_VERIETIES_CAN_ID + "=" + TABLE_CANS + _PNT + COLUMN_CANS_ID + " AND " +
-                TABLE_STATES + _PNT + COLUMN_STATES_ID + "=" + TABLE_BREWS + _PNT + COLUMN_BREWS_PROCESS_STATE;
 
     static final String SQL_BREW_LIST = "SELECT " + TBW + COLUMN_BREWS_ID  + _COM +
         TBW + COLUMN_BREWS_START_DATA  + " AS " + TEXT_VIEW1_STR + _COM +
