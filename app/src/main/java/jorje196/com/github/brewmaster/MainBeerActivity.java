@@ -3,41 +3,66 @@ package jorje196.com.github.brewmaster;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.ListFragment;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-//import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-//import android.widget.TextView;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
 import java.util.ArrayList;
 
-import java.util.Locale;
 
+
+import static jorje196.com.github.brewmaster.BrewListFragment.BLF_TAG;
+import static jorje196.com.github.brewmaster.BrewListFragment.SQL_BREW_LIST;
+import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW1_STR;
+import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW2_STR;
+import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW3_STR;
+import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW4_STR;
 import static jorje196.com.github.brewmaster.DbContract.DbBrands.getBrand;
+import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_FINAL_TEMP;
+import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_ID;
+import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_START_DATA;
+import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_START_WORT_TEMP;
+import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_VOLUME;
+import static jorje196.com.github.brewmaster.DbContract.DbBrews.TABLE_BREWS;
+import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_VOLUME;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_WEIGHT;
+import static jorje196.com.github.brewmaster.DbContract.DbCans.TABLE_CANS;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.getCanCortegeById;
+import static jorje196.com.github.brewmaster.DbContract.DbCans.getCanWeight;
+import static jorje196.com.github.brewmaster.DbContract.DbNames.COLUMN_NAMES_ID;
+import static jorje196.com.github.brewmaster.DbContract.DbNames.COLUMN_NAMES_NAME;
+import static jorje196.com.github.brewmaster.DbContract.DbNames.TABLE_NAMES;
 import static jorje196.com.github.brewmaster.DbContract.DbNames.getName;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_BITTER;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_BRAND_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_CAN_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_COLOR;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_DESCRIPTION;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_NAME_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_SRCIMG;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.TABLE_VERIETIES;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.getVerietyCortegeById;
+import static jorje196.com.github.brewmaster.DbContract._COM;
+import static jorje196.com.github.brewmaster.DbContract._PNT;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_BITTER;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_BRAND;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_COLOR;
@@ -52,18 +77,41 @@ import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_WEIG
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.MEDF_TAG;
 import static jorje196.com.github.brewmaster.TopFragment.TOPF_TAG;
 
-public class MainBeerActivity extends Activity implements MaltExtDescriptionFragment.FragMaltLink {
+public class MainBeerActivity extends Activity implements MaltExtDescriptionFragment.FragMaltLink, BrewListFragment.FragBrewListLink {
 
-//    static final String ARG_FRAG_TAG = "fragTag";
     private ListView drawerList;    // списковое представление для drawer"а
     private DrawerLayout drawerLayout;
     protected SQLiteDatabase brewDb;
     private Cursor cursor;
+    private Cursor cursorBL;
+
 
     private int ChoosedId = 0;
     private int numVerietiesInList = 0;
     private int currentPositionInList = 0;
     private String currentFragTag = TOPF_TAG;
+
+ /*   class BrewListSimpeCursorAdapter extends SimpleCursorAdapter {
+        BrewListSimpeCursorAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to, int flags ){
+            super(context, layout, cursor, from, to, flags);
+        }
+        int currentTextColor = 0;
+        @Override
+        public void setViewText(TextView v, String text) {
+            super.setViewText(v, text);
+
+            if (v.getId() == R.id.text4){
+                if (currentTextColor == 0) currentTextColor = v.getCurrentTextColor();
+                if (text.equals(getResources().getString(R.string.in_progress))){
+                    v.setTextColor(getResources().getColor(R.color.colorAccentNegative));
+                } else {
+                    v.setTextColor(currentTextColor);
+                }
+
+            }
+
+        }
+    } */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,22 +123,20 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             brewDb = new BrewDbHelper(this).getWritableDatabase();
           // проверка по внешним ключам д.б. включена
             brewDb.setForeignKeyConstraintsEnabled(true);
-
+        // TODO Вынести шаблоны строк во фрагмент
           // Инициализация выдвижной панель
-            cursor = brewDb.query(DbContract.DbNames.TABLE_NAMES,
-              new String[] {DbContract.DbNames.COLUMN_NAMES_ID, DbContract.DbNames.COLUMN_NAMES_NAME},
-                    null, null, null, null, DbContract.DbNames.COLUMN_NAMES_NAME);
+            cursor = brewDb.query(TABLE_NAMES,
+              new String[] {COLUMN_NAMES_ID, COLUMN_NAMES_NAME},
+                    null, null, null, null, COLUMN_NAMES_NAME);
             CursorAdapter dbAdapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_list_item_1, cursor, new String[]{DbContract.DbNames.COLUMN_NAMES_NAME},
+                android.R.layout.simple_list_item_1, cursor, new String[]{COLUMN_NAMES_NAME},
                     new int[]{android.R.id.text1}, 0);
 
-             // массив строк из ресурса
-              //    planetsArray = getResources().getStringArray(R.array.planets_array);
               // ссылка на списочное представление из реса
             drawerList = (ListView) findViewById(R.id.drawer);
               // получить ссылку на drawerLayout
             drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-              // связываем списочное представление с массивом строк через адаптор
+              // связываем списочное представление с источником строк через адаптор
             //drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, planetsArray));
             drawerList.setAdapter(dbAdapter);
               // создаем экземпляр для слушателя спискового представления
@@ -105,6 +151,55 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
       }
 
      }
+    // TODO В реализациях методов связи интерфейсов фрагментов : ? нежен ли tag как параметр в обращении ? фрагмент известен и так
+    /* Реализация (абстрактного) метода связи getFBLL (BrewListFra...) с родительской активностью */
+    @Override
+    public void getFBLL(ListFragment fragment, String tag) {
+        setCurrentFragTag(tag);
+        if(cursorBL==null) {
+            // TODO Выбор правил сортировки, нужен ли ?
+
+       /*     String sql1 = "SELECT " + TABLE_VERIETIES + _PNT + COLUMN_VERIETIES_ID + _COM + "CAST(" + COLUMN_CANS_VOLUME + " AS INTEGER)" + '+' + 100 + "*1/3" + " AS " + TEXT_VIEW2_STR +  /* _COM +
+                " (" + " 'Volume' ||" + COLUMN_BREWS_VOLUME + "||  'temp' ||" + COLUMN_BREWS_START_WORT_TEMP + ") AS " + TEXT_VIEW2_STR +
+                    " FROM " + TABLE_VERIETIES + _COM + TABLE_CANS +" WHERE " + ;
+        //    Тренировочный запрос */
+
+            String sql = SQL_BREW_LIST;
+
+            sql += " ORDER BY " + TEXT_VIEW1_STR + " DESC " ;   // Сортировку в отдельную строку для возможности управления её выбором
+
+            String can1, can2, can3;
+            //can1 = getCanWeight(brewDb,1);
+            //can2 = getCanWeight(brewDb, 2);
+            //can3 = getCanWeight(brewDb, 3);
+            try {
+                cursorBL = brewDb.rawQuery(sql, null);
+                int i = 1;
+                i++;
+            } catch(SQLException e){
+                Toast toast = Toast.makeText(this, "Problem with Database", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
+        int i= cursorBL.getCount();
+
+        CursorAdapter adapterBL = new BrewListFragment.BrewListSimpeCursorAdapter(this,
+            R.layout.simple_list_item_3, cursorBL,
+            new String[]{TEXT_VIEW1_STR, TEXT_VIEW2_STR, TEXT_VIEW3_STR, TEXT_VIEW4_STR},
+            new int[]{R.id.text1, R.id.text2, R.id.text3, R.id.text4}, 0);
+
+
+/*
+        //    Простейший вариант для экспериментов
+        CursorAdapter adapterBL = new SimpleCursorAdapter(this,
+                android.R.layout.simple_list_item_1, cursorBL,
+                new String[]{TEXT_VIEW2_STR},
+                new int[]{android.R.id.text1}, 0);*/
+
+
+        fragment.setListAdapter(adapterBL);
+
+    }
     /* Реализация метода связи фрагмента MaltExt... с родительской активностью
     (интерфейс MaltExtDescriptionFragment.FragMaltParams ) */
      @Override
@@ -117,8 +212,6 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         Fragment fragment = new MaltExtDescriptionFragment();
         prepareMaltFragment(fragment, getChoosedId(), brewDb);
         startFragment(fragment, getCurrentFragTag());
-         // ---------------------------------------
-        // TODO осле проверки перевести на set()
      }
 
 
@@ -220,21 +313,7 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         return super.onCreateOptionsMenu(menu);
     }
 
-    /* Обработка кликов на кнопках фрагмента Malt...
-    public int clkNext(View view) {
-        int i = 0;
-        switch(view.getId()){
-            case R.id.button_fmalt_next:
-                i++;
-                break;
-            case R.id.button_fmalt_prev:
-                i--;
-                break;
-        }
 
-        //i = MaltExtDescriptionFragment.getNumId();
-        return i;
-    } */
 
     // выполняется когда выбирается элемент на панели действий, получает объект MenuItem
     @Override
@@ -243,6 +322,10 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             case R.id.action_search:
                 return true;
             case R.id.action_brew_list:
+                // Формируем и отоббражаем фрагмент оо списком варок
+                BrewListFragment brewListFragment= new BrewListFragment();
+                startFragment(brewListFragment, BLF_TAG);
+
                 return true;
             case R.id.action_edit_brew:
                 return true;
@@ -260,7 +343,12 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
     public void onDestroy (){
         super.onDestroy();
         cursor.close();
+        if(cursorBL!=null) cursorBL.close();
+        String forDelDb = brewDb.getPath();
         brewDb.close();
+        this.deleteDatabase(forDelDb);  // TODO Нужно только для отладки на эмуляторе
+        Log.d ("OnDestroy", "Destroy DONE");    // К отладке
+        // sleep(5000);   TODO Добавить прощание ! Не тут
     }
     // геттеры и сеттеры
     int getChoosedId() {

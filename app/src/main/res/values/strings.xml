@@ -18,19 +18,9 @@
     <string name="volume">"   "Объем сусла = </string>
     <string name="temperature">"  "Оптимальная температура процесса" "</string>
 
-    <!-- временный блок -->
-    <string-array name="planets_array">
-        <item>Mercury</item>
-        <item>Venus</item>
-        <item>Earth</item>
-        <item>Mars</item>
-        <item>Jupiter</item>
-        <item>Saturn</item>
-        <item>Uranus</item>
-        <item>Neptune</item>
-    </string-array>
-
-    <!-- TODO: Remove or change this placeholder text -->
+    <!-- строки для fragment_brew_list -->
+    <string name="complited">complited</string>
+    <string name="in_progress">IN PROGRESS</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

@@ -23,7 +23,7 @@ public final class DbContract {
     public DbContract() {
     } // Во избежание создания объектов конструктор пустой
 
-    public static final String DB_NAME = "brewDb";
+    //public static final String DB_NAME = "brewDb";
     // определение общих для таблиц констант
     static final String CREATE_TABLE = "CREATE TABLE ";
     static final String _ID_IPKA = "_id INTEGER PRIMARY KEY AUTOINCREMENT";
@@ -35,6 +35,8 @@ public final class DbContract {
     static final String NOT_NULL = " NOT NULL";
 
     static final String _COM = ", ";  // comma
+    static final String _PNT = "."; // point
+    static final String GRAD_C = "'\u2103'";
     // static final String _SPB = " ";  // spacebar
     static final int BUFFER_STRING_SIZE = 400;  // description может быть длинным !
 
@@ -52,7 +54,7 @@ public final class DbContract {
         static final String COLUMN_BREWS_BOTTLED_DATA = "btl_data";
         static final String COLUMN_BREWS_ALC_PERCENT = "alco_persent";
         static final String COLUMN_BREWS_SECOND_FERMENT_DATA = "fn_second_ferm";
-        static final String COLUMN_BREWS_PROCESS_COMPLETE = "flag_process_complete";
+        static final String COLUMN_BREWS_PROCESS_STATE = "process_state_id";
         static final String COLUMN_BREWS_SUGAR = "sugar";
         static final String COLUMN_BREWS_DEXTROSE = "dextrose";
         static final String COLUMN_BREWS_THICKENERS = "thickeners";
@@ -60,7 +62,9 @@ public final class DbContract {
         static final String COLUMN_BREWS_ENHANCERS = "enhancers";
         static final String COLUMN_BREWS_ENHANCERS_WEIGHT = "enhanc_weight";
         static final String COLUMN_BREWS_NOTES = "notes";
+        static final String COLUMN_BREWS_BITTER = "bitter_actual";  // это шаг назад от нормализации, но удобно
 
+        // В метаданные можно добавить ограничения, начальные значения, etc.
         static final String[][] MT_BREWS_COLUMNS_TYPES = {{COLUMN_BREWS_ID, TYPE_INT,},
             {COLUMN_BREWS_VERIETY_ID, TYPE_INT, NOT_NULL},
             {COLUMN_BREWS_VOLUME, TYPE_REAL},
@@ -68,11 +72,11 @@ public final class DbContract {
             {COLUMN_BREWS_START_WORT_TEMP, TYPE_INT}, {COLUMN_BREWS_FINAL_GRAVITY, TYPE_REAL},
             {COLUMN_BREWS_FINAL_TEMP, TYPE_INT}, {COLUMN_BREWS_BOTTLED_DATA, TYPE_TEXT},
             {COLUMN_BREWS_ALC_PERCENT, TYPE_REAL}, {COLUMN_BREWS_SECOND_FERMENT_DATA, TYPE_TEXT},
-            {COLUMN_BREWS_PROCESS_COMPLETE, TYPE_INT}, {COLUMN_BREWS_SUGAR, TYPE_REAL},
+            {COLUMN_BREWS_PROCESS_STATE, TYPE_INT}, {COLUMN_BREWS_SUGAR, TYPE_REAL},
             {COLUMN_BREWS_DEXTROSE, TYPE_REAL},
             {COLUMN_BREWS_THICKENERS, TYPE_INT}, {COLUMN_BREWS_THICK_WEIGHT, TYPE_REAL},
             {COLUMN_BREWS_ENHANCERS, TYPE_INT}, {COLUMN_BREWS_ENHANCERS_WEIGHT, TYPE_REAL},
-            {COLUMN_BREWS_NOTES, TYPE_TEXT}};
+            {COLUMN_BREWS_NOTES, TYPE_TEXT}, {COLUMN_BREWS_BITTER, TYPE_INT}};
 
         static final String CREATE_TABLE_BREWS = CREATE_TABLE + TABLE_BREWS + "(" + _ID_IPKA +
             getInitString(MT_BREWS_COLUMNS_TYPES) + _COM +
@@ -82,10 +86,15 @@ public final class DbContract {
                 DbThickeners.TABLE_THICKENERS + "(" + DbThickeners.COLUMN_THICKENERS_ID + ")" +
                 _COM + "FOREIGN KEY (" + COLUMN_BREWS_ENHANCERS + ") " + "REFERENCES " +
                 DbEnhancers.TABLE_ENHANCERS + "(" + DbEnhancers.COLUMN_ENHANCERS_ID + ")" +
+                _COM + "FOREIGN KEY (" + COLUMN_BREWS_PROCESS_STATE + ") " + "REFERENCES " +
+                DbStates.TABLE_STATES + "(" + DbStates.COLUMN_STATES_ID + ")" +
                 ")";
 
         static long insertBrews(SQLiteDatabase db, int veriety, double volume, String startDataT,
-            double startGravity, int startTemp, double finalGravity) {
+            double startGravity, int startTemp, double finalGravity, int finalTemp, String bottledData,
+                double alcPercent, String secondFermData, int processState, double sugarWeight,
+                double dextroseWeight, int thickenerId, double thickenerWeight, int enhancerId,
+                double enhancerWeight, String notes, int bitter) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_BREWS_VERIETY_ID, veriety);
             values.put(COLUMN_BREWS_VOLUME, volume);
@@ -93,6 +102,20 @@ public final class DbContract {
             values.put(COLUMN_BREWS_START_GRAVITY, startGravity);
             values.put(COLUMN_BREWS_START_WORT_TEMP, startTemp);
             values.put(COLUMN_BREWS_FINAL_GRAVITY, finalGravity);
+            values.put(COLUMN_BREWS_FINAL_TEMP, finalTemp);
+            values.put(COLUMN_BREWS_BOTTLED_DATA, bottledData);
+            values.put(COLUMN_BREWS_ALC_PERCENT, alcPercent);
+            values.put(COLUMN_BREWS_SECOND_FERMENT_DATA, secondFermData);
+            values.put(COLUMN_BREWS_PROCESS_STATE, processState);
+            values.put(COLUMN_BREWS_SUGAR, sugarWeight);
+            values.put(COLUMN_BREWS_DEXTROSE, dextroseWeight);
+            values.put(COLUMN_BREWS_THICKENERS, thickenerId);
+            values.put(COLUMN_BREWS_THICK_WEIGHT, thickenerWeight);
+            values.put(COLUMN_BREWS_ENHANCERS, enhancerId);
+            values.put(COLUMN_BREWS_ENHANCERS_WEIGHT, enhancerWeight);
+            values.put(COLUMN_BREWS_NOTES, notes);
+            values.put(COLUMN_BREWS_BITTER, bitter);
+
 
             return insertTable(db, TABLE_BREWS, values);
         }
@@ -200,6 +223,20 @@ public final class DbContract {
         // Получение enhancer по id (int)
         static String getEnhancer(SQLiteDatabase db, int enhancerID) {
             return getEnhancer(db, Integer.toString(enhancerID));
+        }
+    }
+
+    // *** Вложенный (nested) класс для таблицы States
+    static abstract class DbStates implements BaseColumns {
+        static final String TABLE_STATES = "states";
+        static final String COLUMN_STATES_ID = "_id";
+        static final String COLUMN_STATES_TEXT = "state_text";
+        static final String CREATE_TABLE_STATES = CREATE_TABLE + TABLE_STATES +
+                "(" + _ID_IPKA + _COM + COLUMN_STATES_TEXT + TYPE_TEXT + ")";
+
+        // Добавление записи в таблицу
+        static long insertState(SQLiteDatabase db, String processState) {
+            return insertSimpeTable(db, TABLE_STATES, COLUMN_STATES_TEXT, processState);
         }
     }
 
@@ -384,6 +421,7 @@ public final class DbContract {
         StringBuffer result = new StringBuffer(BUFFER_STRING_SIZE);
         for (int i=1; i< metaData.length; i++) {
             result.append(" ,").append(metaData[i][0]).append(metaData[i][1]);
+            // Можно добавить установку начальных значений, ограничений и так далее
         }
         return result.toString();
         }
