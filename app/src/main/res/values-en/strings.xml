@@ -18,5 +18,9 @@
     <string name="volume">"   "Recomended volume = </string>
     <string name="temperature">"  "Processe optimum temperature" "</string>
 
+    <!-- строки для fragment_brew_list -->
+    <string name="complited">COMPLITED</string>
+    <string name="in_progress">IN PROGRESS</string>
+
 
 </resources>
