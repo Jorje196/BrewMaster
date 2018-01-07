@@ -22,5 +22,7 @@
     <string name="complited">COMPLITED</string>
     <string name="in_progress">IN PROGRESS</string>
 
+    <!-- строки для fragment_brew   -->
+    <string name="headingIngredients">I N G R E D I E N T S</string>
 
 </resources>

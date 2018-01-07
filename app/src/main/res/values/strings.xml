@@ -22,6 +22,10 @@
     <string name="complited">complited</string>
     <string name="in_progress">IN PROGRESS</string>
 
+    <!-- строки для fragment_brew   -->
+    <string name="headingIngredients">И Н Г Р Е Д И Е Н Т Ы</string>
+
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

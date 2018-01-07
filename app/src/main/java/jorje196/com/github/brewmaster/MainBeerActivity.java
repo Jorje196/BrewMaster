@@ -5,11 +5,9 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -27,7 +25,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 
-
+import static jorje196.com.github.brewmaster.BrewDescriptionFragment.BDF_TAG;
 import static jorje196.com.github.brewmaster.BrewListFragment.BLF_TAG;
 import static jorje196.com.github.brewmaster.BrewListFragment.SQL_BREW_LIST;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW1_STR;
@@ -143,7 +141,7 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             drawerList.setOnItemClickListener(new DrawerItemClickListener());
               // Выбираем стартовый фрагмент для фрейма
             if (savedInstanceState == null) {
-                selectItem(0, 0);
+                selectDrawerItem(0, 0);
             }
         } catch (SQLException e) {
             Toast toast = Toast.makeText(this, "Problem with Database", Toast.LENGTH_SHORT);
@@ -177,11 +175,14 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
                 int i = 1;
                 i++;
             } catch(SQLException e){
-                Toast toast = Toast.makeText(this, "Problem with Database", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(this, "Problem with rawQuery ", Toast.LENGTH_SHORT);
+                toast.show();
+            } catch (ArithmeticException e) {
+                Toast toast = Toast.makeText(this, "Problem with Arithmetic in rawQuery ", Toast.LENGTH_SHORT);
                 toast.show();
             }
         }
-        int i= cursorBL.getCount();
+        int i= cursorBL.getCount();     // отладочное
 
         CursorAdapter adapterBL = new BrewListFragment.BrewListSimpeCursorAdapter(this,
             R.layout.simple_list_item_3, cursorBL,
@@ -222,12 +223,12 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             /* видимо, так :
             parent - ListView; view - элемент списка (тут строка) , далее её позиция и id
              */
-            selectItem(position, id);
+            selectDrawerItem(position, id);
         }
     }
 
     // Обработка выбранного пункта выдвижного списка
-    private void selectItem(int position, long id){
+    private void selectDrawerItem(int position, long id){
         Fragment fragment;
         String fragTag;
         // выбор фрагмента, передача ему параметров и запуск
@@ -274,6 +275,7 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         ft.commit();
 
     }
+
     /* Метод получает из Db информацию для отображения во фрагменте MaltExtDesc...
     Обрабатывает её и готовит пакет к передаче . Можно и ArrayList, но читаемость ухудшается */
     Bundle prepareMaltInfo(SQLiteDatabase db, String VerietyId) {
@@ -330,6 +332,10 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             case R.id.action_edit_brew:
                 return true;
             case R.id.action_create_brew:
+                // Начинаем новую варку
+                BrewDescriptionFragment brewDescriptionFragment = new BrewDescriptionFragment();
+                startFragment(brewDescriptionFragment, BDF_TAG);
+
                 return true;
             case R.id.action_settings:
                 return true;
