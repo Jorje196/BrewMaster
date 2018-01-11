@@ -25,4 +25,9 @@
     <!-- строки для fragment_brew   -->
     <string name="headingIngredients">I N G R E D I E N T S</string>
 
+    <!-- для выдвижной панели -->
+    <string name="open_drawer">Open drawer</string>
+    <string name="close_drawer">Close drawer</string>
+
+
 </resources>

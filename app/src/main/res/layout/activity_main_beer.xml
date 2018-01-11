@@ -10,13 +10,13 @@
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-        <TextView
+        <!--TextView
             android:id="@+id/top_exp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:text=""
-           />
+           /-->
 
 
     </FrameLayout>

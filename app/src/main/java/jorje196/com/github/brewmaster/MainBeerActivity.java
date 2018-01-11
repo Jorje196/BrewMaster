@@ -1,14 +1,21 @@
 package jorje196.com.github.brewmaster;
 
+//import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.ContentValues;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBarDrawerToggle;
+
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +25,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.TextView;
+import android.support.v7.app.ActionBar;
 import android.widget.Toast;
 
 
@@ -72,13 +79,17 @@ import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_SIZE
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_SRCIMG;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_VOLUME;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_WEIGHT;
-import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.MEDF_TAG;
-import static jorje196.com.github.brewmaster.TopFragment.TOPF_TAG;
 
 public class MainBeerActivity extends Activity implements MaltExtDescriptionFragment.FragMaltLink, BrewListFragment.FragBrewListLink {
+    static final String TAG_FOR_ALL = "visible_fragment";
+    static final int TOP_FRAG_NUM = 1;              // TopFragment
+    static final int MALT_EXT_DESCRIPT_NUM = 2;     // MaltExtDescriptionFragment
+    static final int BREW_LIST_FRAG_NUM = 3;        // BrewListFragment
+    static final int BREW_DESCRIPT_FRAG_NUM = 4;    // BrewDescriptionFragment
 
     private ListView drawerList;    // списковое представление для drawer"а
     private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
     protected SQLiteDatabase brewDb;
     private Cursor cursor;
     private Cursor cursorBL;
@@ -87,29 +98,6 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
     private int ChoosedId = 0;
     private int numVerietiesInList = 0;
     private int currentPositionInList = 0;
-    private String currentFragTag = TOPF_TAG;
-
- /*   class BrewListSimpeCursorAdapter extends SimpleCursorAdapter {
-        BrewListSimpeCursorAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to, int flags ){
-            super(context, layout, cursor, from, to, flags);
-        }
-        int currentTextColor = 0;
-        @Override
-        public void setViewText(TextView v, String text) {
-            super.setViewText(v, text);
-
-            if (v.getId() == R.id.text4){
-                if (currentTextColor == 0) currentTextColor = v.getCurrentTextColor();
-                if (text.equals(getResources().getString(R.string.in_progress))){
-                    v.setTextColor(getResources().getColor(R.color.colorAccentNegative));
-                } else {
-                    v.setTextColor(currentTextColor);
-                }
-
-            }
-
-        }
-    } */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,9 +127,32 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             drawerList.setAdapter(dbAdapter);
               // создаем экземпляр для слушателя спискового представления
             drawerList.setOnItemClickListener(new DrawerItemClickListener());
-              // Выбираем стартовый фрагмент для фрейма
+
+            // Для управления drawer и составом меню в ActionBar создаем :
+            drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
+                    R.string.open_drawer, R.string.close_drawer) {
+                @Override   // Вызыв. при переходе drawer в полностью закрытое сост.
+                public void onDrawerClosed (View view) {
+                    super.onDrawerClosed(view);
+                    // todo тут свой код
+                }
+                @Override   // Вызыв. при переходе drawer в полностью открытое сост.
+                public void onDrawerOpened (View view) {
+                    super.onDrawerOpened(view);
+                    // todo вой код
+                }
+            };
+            // И связываем объект с DrawerLayout
+            drawerLayout.addDrawerListener(drawerToggle); // отключить = remove
+
+            // Включение Кн Вверх для использования её объектом drawerToggle
+            this.getActionBar().setDisplayHomeAsUpEnabled(true);
+            this.getActionBar().setHomeButtonEnabled(true);
+
+            // Выбираем стартовый фрагмент для фрейма
             if (savedInstanceState == null) {
                 selectDrawerItem(0, 0);
+
             }
         } catch (SQLException e) {
             Toast toast = Toast.makeText(this, "Problem with Database", Toast.LENGTH_SHORT);
@@ -149,11 +160,50 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
       }
 
      }
+
+    // Для синхронизации значка выдвижной панели с её состоянием (после onRestoreInstanceState)
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        if (drawerToggle != null)
+            drawerToggle.syncState();
+    }
+
+    /* При изменении конфигурации передаем ActionBarDrawerToggle информацию об
+    изменениях (велено руководством разработчика, и логично).
+    P.S. Добавить проверку в обработку кликов на панели действий (верх меню)
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig){
+        super.onConfigurationChanged(newConfig);
+        if (drawerToggle != null)
+            drawerToggle.onConfigurationChanged(newConfig);
+
+    }
+
+     // Метод определения текущего активного фрагмента, связанного с активностью
+    private int searchCurrentFragment() {
+        int fragmentNum = 0;
+        FragmentManager fragMng = getFragmentManager();
+        // Фрагмент, в настоящее время связанный с активностью (поиск начинается с активного)
+        Fragment fragment = fragMng.findFragmentByTag(TAG_FOR_ALL);
+        // ищем , к какому типу относится фраг и возвращаем результат
+        if (fragment instanceof TopFragment){
+            fragmentNum = TOP_FRAG_NUM;
+        } else if (fragment instanceof MaltExtDescriptionFragment){
+            fragmentNum = MALT_EXT_DESCRIPT_NUM;
+        } else if (fragment instanceof BrewListFragment){
+            fragmentNum = BREW_LIST_FRAG_NUM;
+        } else if (fragment instanceof BrewDescriptionFragment)
+            fragmentNum = BREW_DESCRIPT_FRAG_NUM;
+        return fragmentNum;
+    }
+
     // TODO В реализациях методов связи интерфейсов фрагментов : ? нежен ли tag как параметр в обращении ? фрагмент известен и так
     /* Реализация (абстрактного) метода связи getFBLL (BrewListFra...) с родительской активностью */
     @Override
     public void getFBLL(ListFragment fragment, String tag) {
-        setCurrentFragTag(tag);
         if(cursorBL==null) {
             // TODO Выбор правил сортировки, нужен ли ?
 
@@ -172,8 +222,8 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             //can3 = getCanWeight(brewDb, 3);
             try {
                 cursorBL = brewDb.rawQuery(sql, null);
-                int i = 1;
-                i++;
+                int i = 1;  // отладочное
+                i++;    // отладочное
             } catch(SQLException e){
                 Toast toast = Toast.makeText(this, "Problem with rawQuery ", Toast.LENGTH_SHORT);
                 toast.show();
@@ -204,15 +254,14 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
     /* Реализация метода связи фрагмента MaltExt... с родительской активностью
     (интерфейс MaltExtDescriptionFragment.FragMaltParams ) */
      @Override
-     public void getFML(String tag, int id, int size, int position){
+     public void getFML(String tag, int id, int size, int position){        //todo Нужны ли String tag  линках ?
         setCurrentPositionInList(position);
         setNumVerietiesInList(size);
         setChoosedId(id);
-        setCurrentFragTag(tag);
 
         Fragment fragment = new MaltExtDescriptionFragment();
         prepareMaltFragment(fragment, getChoosedId(), brewDb);
-        startFragment(fragment, getCurrentFragTag());
+        startFragment(fragment, TAG_FOR_ALL);
      }
 
 
@@ -227,21 +276,20 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         }
     }
 
+    //
+
     // Обработка выбранного пункта выдвижного списка
     private void selectDrawerItem(int position, long id){
         Fragment fragment;
-        String fragTag;
         // выбор фрагмента, передача ему параметров и запуск
         switch ((int)id) {
             case 0 :
                 fragment = new TopFragment();
-                setCurrentFragTag(TOPF_TAG);
                 break;
             default : {
                 fragment = new MaltExtDescriptionFragment();
                 setCurrentPositionInList(0);
                 setChoosedId((int)id);
-                setCurrentFragTag(MEDF_TAG);
 
                 prepareMaltFragment(fragment, getChoosedId(), brewDb);
 
@@ -249,9 +297,9 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         }
 
         // выводим фрагмент с исп транзакции фрагмента
-        startFragment(fragment, getCurrentFragTag());
+        startFragment(fragment, TAG_FOR_ALL);
 
-        drawerLayout.closeDrawer(drawerList); // закрывает выдвижную панель, связанную с drawerLayout
+        drawerLayout.closeDrawer(drawerList); // пункт выбран => закрываем выдвижную панель
 
     }
     //  Метод выполняет стандартные шаги подготовки фраг. описания Malt
@@ -320,6 +368,9 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
     // выполняется когда выбирается элемент на панели действий, получает объект MenuItem
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Чтобы объект ActionBarDrawerToggle реагировал на выбор (клики, щелчки ..)
+        if (drawerToggle != null && drawerToggle.onOptionsItemSelected(item)) return true;
+
         switch (item.getItemId()) {
             case R.id.action_search:
                 return true;
@@ -334,7 +385,7 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             case R.id.action_create_brew:
                 // Начинаем новую варку
                 BrewDescriptionFragment brewDescriptionFragment = new BrewDescriptionFragment();
-                startFragment(brewDescriptionFragment, BDF_TAG);
+                startFragment(brewDescriptionFragment, TAG_FOR_ALL);
 
                 return true;
             case R.id.action_settings:
@@ -375,10 +426,5 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
     void setCurrentPositionInList(int pos) {
         currentPositionInList = pos;
     }
-    String getCurrentFragTag() {
-        return currentFragTag;
-    }
-    void setCurrentFragTag(String tag) {
-        currentFragTag = tag;
-    }
+
 }
