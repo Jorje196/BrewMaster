@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="process_stage">
+        <item>FERMENTATION</item>
+        <item>CARBONATION</item>
+        <item>MATURATION</item>
+        <item>AGEING</item>
+    </string-array>
+</resources>

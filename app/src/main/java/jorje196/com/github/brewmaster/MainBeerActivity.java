@@ -1,37 +1,44 @@
 package jorje196.com.github.brewmaster;
 
-//import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarDrawerToggle;
 
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.ActionProvider;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.ShareActionProvider;
 import android.widget.SimpleCursorAdapter;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.widget.Toast;
-
+import jorje196.com.github.brewmaster.MaltExtDescriptionFragment.FragMaltLink;
+import jorje196.com.github.brewmaster.BrewListFragment.FragBrewListLink;
 
 import java.util.ArrayList;
 
 
+import static android.view.MenuItem.SHOW_AS_ACTION_ALWAYS;
+import static jorje196.com.github.brewmaster.BrewDescriptionFragment.ARG_CORTEGE_ID;
+import static jorje196.com.github.brewmaster.BrewDescriptionFragment.ARG_SOURCE;
 import static jorje196.com.github.brewmaster.BrewDescriptionFragment.BDF_TAG;
 import static jorje196.com.github.brewmaster.BrewListFragment.BLF_TAG;
 import static jorje196.com.github.brewmaster.BrewListFragment.SQL_BREW_LIST;
@@ -80,19 +87,27 @@ import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_SRCI
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_VOLUME;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_WEIGHT;
 
-public class MainBeerActivity extends Activity implements MaltExtDescriptionFragment.FragMaltLink, BrewListFragment.FragBrewListLink {
+
+public class MainBeerActivity extends Activity implements FragMaltLink, FragBrewListLink {
     static final String TAG_FOR_ALL = "visible_fragment";
     static final int TOP_FRAG_NUM = 1;              // TopFragment
     static final int MALT_EXT_DESCRIPT_NUM = 2;     // MaltExtDescriptionFragment
     static final int BREW_LIST_FRAG_NUM = 3;        // BrewListFragment
     static final int BREW_DESCRIPT_FRAG_NUM = 4;    // BrewDescriptionFragment
 
+
+    Context cntMBA;
+    /*@org.jetbrains.annotations.Contract(pure = true)
+    public static Context getCntMBA() {
+        return cntMBA;
+    }*/
     private ListView drawerList;    // списковое представление для drawer"а
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     protected SQLiteDatabase brewDb;
     private Cursor cursor;
     private Cursor cursorBL;
+    private ShareActionProvider shareActionProvider;
 
 
     private int ChoosedId = 0;
@@ -103,7 +118,11 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_beer);
+        if(cntMBA==null)cntMBA = getApplicationContext();
 
+        //NumberPicker numPicker = (NumberPicker)findViewById(R.id.numberPicker);
+        //int orientation = getResources().getConfiguration().orientation;
+        //orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
         // подключение к БД
         try   {
             brewDb = new BrewDbHelper(this).getWritableDatabase();
@@ -139,15 +158,16 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
                 @Override   // Вызыв. при переходе drawer в полностью открытое сост.
                 public void onDrawerOpened (View view) {
                     super.onDrawerOpened(view);
-                    // todo вой код
+                    // todo свой код
                 }
             };
             // И связываем объект с DrawerLayout
             drawerLayout.addDrawerListener(drawerToggle); // отключить = remove
 
             // Включение Кн Вверх для использования её объектом drawerToggle
-            this.getActionBar().setDisplayHomeAsUpEnabled(true);
             this.getActionBar().setHomeButtonEnabled(true);
+            this.getActionBar().setDisplayHomeAsUpEnabled(true);
+            //this.getActionBar().get
 
             // Выбираем стартовый фрагмент для фрейма
             if (savedInstanceState == null) {
@@ -239,18 +259,16 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
             new String[]{TEXT_VIEW1_STR, TEXT_VIEW2_STR, TEXT_VIEW3_STR, TEXT_VIEW4_STR},
             new int[]{R.id.text1, R.id.text2, R.id.text3, R.id.text4}, 0);
 
-
-/*
-        //    Простейший вариант для экспериментов
+     /*    //    Простейший вариант для экспериментов
         CursorAdapter adapterBL = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_1, cursorBL,
                 new String[]{TEXT_VIEW2_STR},
                 new int[]{android.R.id.text1}, 0);*/
 
-
         fragment.setListAdapter(adapterBL);
 
     }
+
     /* Реализация метода связи фрагмента MaltExt... с родительской активностью
     (интерфейс MaltExtDescriptionFragment.FragMaltParams ) */
      @Override
@@ -263,7 +281,6 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         prepareMaltFragment(fragment, getChoosedId(), brewDb);
         startFragment(fragment, TAG_FOR_ALL);
      }
-
 
     // реализуем слушателя к выдвижному списку
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -352,7 +369,14 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         argBundle.putInt(ARG_POSITION,getCurrentPositionInList());
     }
 
+/**************************************************************
+    Работа с фрагментом детализации варки */
 
+    // Обработка клика на выборе экстракта
+public void maltChoiseInBrewDescription(View view) {
+    int i=0;
+    i++;
+}
 
 //**************************************************************
     //для отображения меню на панели действий реализуем метод onCreateOptionsMenu()
@@ -360,18 +384,44 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_of_actions, menu);
-        return super.onCreateOptionsMenu(menu);
+
+        /* Блок добавлен для устранения непонятности с применением support v7, и
+          принудительно устанавливает видимость иконок на ActionBar. Возможно дело
+          в неустоявшейся версии библиотеки поддержки , стоит проверять с обновлениями,
+          нестыковка может пропасть . Пенка в восприятии пространств имен app / android */
+        int i = menu.size();  // отладочное
+        MenuItem n = menu.findItem(R.id.action_brew_list);
+        n.setShowAsAction(SHOW_AS_ACTION_ALWAYS);
+        n = menu.findItem(R.id.action_create_brew);
+        n.setShowAsAction(SHOW_AS_ACTION_ALWAYS);
+        i++;     // отладочное
+
+        /* С ShareActionProvider та же проблема с пространствами имен.
+         Пока в xml убрал app вернул android . Если само не пройдет, решать аналогично */
+
+        return    super.onCreateOptionsMenu(menu);
     }
-
-
+    // Метод создает интент и передает его провайдеру действия (для action_share)
+    private void setIntent(String text){
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+        shareActionProvider.setShareIntent(intent);
+    }
 
     // выполняется когда выбирается элемент на панели действий, получает объект MenuItem
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Чтобы объект ActionBarDrawerToggle реагировал на выбор (клики, щелчки ..)
-        if (drawerToggle != null && drawerToggle.onOptionsItemSelected(item)) return true;
+        int i=0;
+        if (item.getItemId()==android.R.id.home ){
 
-        switch (item.getItemId()) {
+            i++;
+        }
+
+        if (drawerToggle != null && drawerToggle.onOptionsItemSelected(item)) return true;
+        i++;
+        switch (i = item.getItemId()) {
             case R.id.action_search:
                 return true;
             case R.id.action_brew_list:
@@ -380,20 +430,244 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
                 startFragment(brewListFragment, BLF_TAG);
 
                 return true;
-            case R.id.action_edit_brew:
-                return true;
+
             case R.id.action_create_brew:
                 // Начинаем новую варку
                 BrewDescriptionFragment brewDescriptionFragment = new BrewDescriptionFragment();
+
+                Bundle bundleBDF = new Bundle();
+                bundleBDF.putInt(ARG_SOURCE, 0);
+                bundleBDF.putInt(ARG_CORTEGE_ID, 0);
+                brewDescriptionFragment.setArguments(bundleBDF);
                 startFragment(brewDescriptionFragment, TAG_FOR_ALL);
 
                 return true;
+            case R.id.action_share:
+                // Получение ссылки на провайдера действия передачи информации
+                shareActionProvider = (ShareActionProvider) item.getActionProvider();
+                setIntent("This is test"); // отладочная
+
+                return true;
             case R.id.action_settings:
+
+                MenuItem item1 = new MenuItem() {
+                    @Override
+                    public int getItemId() {
+                        return android.R.id.home;
+                    }
+
+                    @Override
+                    public int getGroupId() {
+                        return 0;
+                    }
+
+                    @Override
+                    public int getOrder() {
+                        return 0;
+                    }
+
+                    @Override
+                    public MenuItem setTitle(CharSequence title) {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setTitle(int title) {
+                        return null;
+                    }
+
+                    @Override
+                    public CharSequence getTitle() {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setTitleCondensed(CharSequence title) {
+                        return null;
+                    }
+
+                    @Override
+                    public CharSequence getTitleCondensed() {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setIcon(Drawable icon) {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setIcon(int iconRes) {
+                        return null;
+                    }
+
+                    @Override
+                    public Drawable getIcon() {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setIntent(Intent intent) {
+                        return null;
+                    }
+
+                    @Override
+                    public Intent getIntent() {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setShortcut(char numericChar, char alphaChar) {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setNumericShortcut(char numericChar) {
+                        return null;
+                    }
+
+                    @Override
+                    public char getNumericShortcut() {
+                        return 0;
+                    }
+
+                    @Override
+                    public MenuItem setAlphabeticShortcut(char alphaChar) {
+                        return null;
+                    }
+
+                    @Override
+                    public char getAlphabeticShortcut() {
+                        return 0;
+                    }
+
+                    @Override
+                    public MenuItem setCheckable(boolean checkable) {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean isCheckable() {
+                        return false;
+                    }
+
+                    @Override
+                    public MenuItem setChecked(boolean checked) {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean isChecked() {
+                        return false;
+                    }
+
+                    @Override
+                    public MenuItem setVisible(boolean visible) {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean isVisible() {
+                        return false;
+                    }
+
+                    @Override
+                    public MenuItem setEnabled(boolean enabled) {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean isEnabled() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean hasSubMenu() {
+                        return false;
+                    }
+
+                    @Override
+                    public SubMenu getSubMenu() {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setOnMenuItemClickListener(OnMenuItemClickListener menuItemClickListener) {
+                        return null;
+                    }
+
+                    @Override
+                    public ContextMenu.ContextMenuInfo getMenuInfo() {
+                        return null;
+                    }
+
+                    @Override
+                    public void setShowAsAction(int actionEnum) {
+
+                    }
+
+                    @Override
+                    public MenuItem setShowAsActionFlags(int actionEnum) {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setActionView(View view) {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setActionView(int resId) {
+                        return null;
+                    }
+
+                    @Override
+                    public View getActionView() {
+                        return null;
+                    }
+
+                    @Override
+                    public MenuItem setActionProvider(ActionProvider actionProvider) {
+                        return null;
+                    }
+
+                    @Override
+                    public ActionProvider getActionProvider() {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean expandActionView() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean collapseActionView() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isActionViewExpanded() {
+                        return false;
+                    }
+
+                    @Override
+                    public MenuItem setOnActionExpandListener(OnActionExpandListener listener) {
+                        return null;
+                    }
+                };
+                onOptionsItemSelected(item1);
                 return true;
             case R.id.action_saving:
                 return true;
+            case android.R.id.home:
+
+
+                i = 1;
             default:
+                i++;
                 return super.onOptionsItemSelected(item);
+
         }
     }
     @Override
@@ -407,7 +681,7 @@ public class MainBeerActivity extends Activity implements MaltExtDescriptionFrag
         Log.d ("OnDestroy", "Destroy DONE");    // К отладке
         // sleep(5000);   TODO Добавить прощание ! Не тут
     }
-    // геттеры и сеттеры
+    // геттеры и сеттеры ? для кого , так ли надо ?
     int getChoosedId() {
         return ChoosedId;
     }

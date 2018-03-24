@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorAccentPositive">#17ef17</color>
     <color name="colorAccentNegative">#df1212</color>
+    <color name="background_light">#7e676c</color>
 </resources>

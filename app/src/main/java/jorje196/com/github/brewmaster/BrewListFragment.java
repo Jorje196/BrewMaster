@@ -5,6 +5,8 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
@@ -45,12 +47,12 @@ import static jorje196.com.github.brewmaster.DbContract._PNT;
 
 public  class BrewListFragment extends ListFragment {
     static final String BLF_TAG = "brewList";    // тег фрагмента
-        // Имена полей в собственном макете элемента списка
+    // Имена полей в собственном макете элемента списка
     static final String TEXT_VIEW1_STR = "brewListView1";
     static final String TEXT_VIEW2_STR = "brewListView2";
     static final String TEXT_VIEW3_STR = "brewListView3";
     static final String TEXT_VIEW4_STR = "brewListView4";
-        // Сокращения имен таблиц для текста запроса
+    // Сокращения имен таблиц для текста запроса
     static final String TBD = TABLE_BRANDS + ".";
     static final String TBW = TABLE_BREWS + ".";
     static final String TCN = TABLE_CANS + ".";
@@ -58,26 +60,26 @@ public  class BrewListFragment extends ListFragment {
     static final String TNM = TABLE_NAMES + ".";
     static final String TST = TABLE_STATES + ".";
 
-        // Строка SQL-запроса формирования курсора для работы с фрагментом списка
+    // Строка SQL-запроса формирования курсора для работы с фрагментом списка
 
-    static final String SQL_BREW_LIST = "SELECT " + TBW + COLUMN_BREWS_ID  + _COM +
-        TBW + COLUMN_BREWS_START_DATA  + " AS " + TEXT_VIEW1_STR + _COM +
-        " ( " + TNM + COLUMN_NAMES_NAME + "||'   '||" +
-        TBD + COLUMN_BRANDS_BRAND + " ) AS " + TEXT_VIEW2_STR + _COM +
-        " (" + " 'Output ' ||" + TBW + COLUMN_BREWS_VOLUME + "||  'л   Alc ' ||" +
-        TBW + COLUMN_BREWS_ALC_PERCENT + "||  ' %об.    Bitt ' ||" +
-        "CAST(ROUND(" + TVR + COLUMN_VERIETIES_BITTER + "*" + TCN + COLUMN_CANS_WEIGHT +
-        "/"  + TBW + COLUMN_BREWS_VOLUME + ", 0) AS INTEGER)" + ") AS " + TEXT_VIEW3_STR + _COM +
-        TST + COLUMN_STATES_TEXT  + " AS " + TEXT_VIEW4_STR +
+    static final String SQL_BREW_LIST = "SELECT " + TBW + COLUMN_BREWS_ID + _COM +
+            TBW + COLUMN_BREWS_START_DATA + " AS " + TEXT_VIEW1_STR + _COM +
+            " ( " + TNM + COLUMN_NAMES_NAME + "||'   '||" +
+            TBD + COLUMN_BRANDS_BRAND + " ) AS " + TEXT_VIEW2_STR + _COM +
+            " (" + " 'Output ' ||" + TBW + COLUMN_BREWS_VOLUME + "||  'л   Alc ' ||" +
+            TBW + COLUMN_BREWS_ALC_PERCENT + "||  ' %об.    Bitt ' ||" +
+            "CAST(ROUND(" + TVR + COLUMN_VERIETIES_BITTER + "*" + TCN + COLUMN_CANS_WEIGHT +
+            "/" + TBW + COLUMN_BREWS_VOLUME + ", 0) AS INTEGER)" + ") AS " + TEXT_VIEW3_STR + _COM +
+            TST + COLUMN_STATES_TEXT + " AS " + TEXT_VIEW4_STR +
             " FROM " +
-        TABLE_BREWS +_COM + TABLE_VERIETIES + _COM + TABLE_BRANDS + _COM +
-        TABLE_NAMES + _COM + TABLE_STATES + _COM + TABLE_CANS +
+            TABLE_BREWS + _COM + TABLE_VERIETIES + _COM + TABLE_BRANDS + _COM +
+            TABLE_NAMES + _COM + TABLE_STATES + _COM + TABLE_CANS +
             " WHERE " +
-        TBW + COLUMN_BREWS_VERIETY_ID + "=" + TVR + COLUMN_VERIETIES_ID + " AND " +
-        TVR + COLUMN_VERIETIES_BRAND_ID + "=" + TBD + COLUMN_BRANDS_ID + " AND " +
-        TVR + COLUMN_VERIETIES_NAME_ID + "=" + TNM + COLUMN_NAMES_ID + " AND " +
-        TVR + COLUMN_VERIETIES_CAN_ID + "=" + TCN + COLUMN_CANS_ID + " AND " +
-        TST + COLUMN_STATES_ID + "=" + TBW + COLUMN_BREWS_PROCESS_STATE;
+            TBW + COLUMN_BREWS_VERIETY_ID + "=" + TVR + COLUMN_VERIETIES_ID + " AND " +
+            TVR + COLUMN_VERIETIES_BRAND_ID + "=" + TBD + COLUMN_BRANDS_ID + " AND " +
+            TVR + COLUMN_VERIETIES_NAME_ID + "=" + TNM + COLUMN_NAMES_ID + " AND " +
+            TVR + COLUMN_VERIETIES_CAN_ID + "=" + TCN + COLUMN_CANS_ID + " AND " +
+            TST + COLUMN_STATES_ID + "=" + TBW + COLUMN_BREWS_PROCESS_STATE;
 
     /*  nested inner class
         Класс адаптера курсора, расширяющий SimpleCursorAdapter, создан для получения возможности переписывать методы адаптера курсора,
@@ -86,20 +88,23 @@ public  class BrewListFragment extends ListFragment {
      */
     static class BrewListSimpeCursorAdapter extends SimpleCursorAdapter {
         Context ctx;
-        BrewListSimpeCursorAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to, int flags ){
+
+        BrewListSimpeCursorAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to, int flags) {
             super(context, layout, cursor, from, to, flags);
             ctx = context;
         }
+
         int currentTextColor = 0;
+
         @Override
         public void setViewText(TextView v, String text) {
             super.setViewText(v, text);
-            if (v.getId() == R.id.text4){
+            if (v.getId() == R.id.text4) {
                 if (currentTextColor == 0) currentTextColor = v.getCurrentTextColor();
-                if (text.equals(ctx.getResources().getString(R.string.in_progress))){
+                if (text.equals(ctx.getResources().getString(R.string.in_progress))) {
                     v.setTextColor(ctx.getResources().getColor(R.color.colorAccentNegative));
                 } else {
-                // Без этого цвет сохраняется при уходе элемента в тень и возвращении , цветовое выделение плодится бесконтрольно
+                    // Без этого цвет сохраняется при уходе элемента в тень и возвращении , цветовое выделение плодится бесконтрольно
                     v.setTextColor(currentTextColor);
                 }
             }
@@ -110,13 +115,14 @@ public  class BrewListFragment extends ListFragment {
     interface FragBrewListLink {
         void getFBLL(ListFragment fragment, String tag);
     }
+
     FragBrewListLink onFragBrewListLink;
 
     @Override
     public void onAttach(Activity context) {    // Activity, not Context, else NullPointerException
-        super.onAttach(context);
+        super.onAttach(context);                // todo связано с вер.API (с 24 это Context
         try {
-            onFragBrewListLink = (FragBrewListLink)context;
+            onFragBrewListLink = (FragBrewListLink) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onSomeEventListener");
         }
@@ -127,9 +133,10 @@ public  class BrewListFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         onFragBrewListLink.getFBLL(this, BLF_TAG);
-       // TODO Для исключения утечки памяти надо открывать и закрывать курсоры для адаптера в callback'ах по onActivityCreate и ? onDesrtoy ?
+        // TODO Для исключения утечки памяти надо открывать и закрывать курсоры для адаптера в callback'ах по onActivityCreate и ? onDesrtoy ?
 
     }
+
     /* Чтобы отображался не layout по умолчанию, а определенный в fragment_brew_list.xml
     Если По умолчанию устраивает, то блок лишний.
     P.S. android:list & android:empty по определению, заменить нельзя
@@ -137,6 +144,12 @@ public  class BrewListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInscanceState){
         return inflater.inflate(R.layout.fragment_brew_list, null);
     }      */
-
-
+    // Обработка выбора пункта из списка варок
+    @Override
+    public void onListItemClick(ListView listView, View itemView, int position, long id) {    //Что-то происходит }
+        super.onListItemClick(listView, itemView, position, id);
+        int i = 0;
+        i++;
+        position++;
+    }
 }

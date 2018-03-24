@@ -1,11 +1,12 @@
 <resources>
-    <string name="app_name">Пивовар</string>
+    <string name="app_name">BrewMaster</string>
+    <string name="activity_main_name">Пивовар</string>
 
     <string name="action_settings">Настройки</string>
     <string name="action_saving">Сохранить</string>
     <string name="action_search">Поиск</string>
     <string name="action_brew_list">Варки</string>
-    <string name="action_edit_brew">Текущие варки</string>
+    <string name="action_edit">Редактировать</string>
     <string name="action_create_brew">Новая варка</string>
     <string name="action_share">Поделиться</string>
 
@@ -23,13 +24,67 @@
     <string name="in_progress">IN PROGRESS</string>
 
     <!-- строки для fragment_brew   -->
+    <string name="cancel_choice">Отменить</string>
     <string name="headingIngredients">И Н Г Р Е Д И Е Н Т Ы</string>
+    <string name="headingStarting">Б Р О Ж Е Н И Е</string>
+    <string name="button_extract_choice">Выбор экстракта</string>
+    <string name="button_primer_choice">Выбор праймера</string>
+    <string name="malt_extract_name">Выбор экстракта тут</string>
+    <string name="title_malt_extract_brand">"         ВЫБОР БРЕНДА"</string>
+    <string name="alert_malt_extract_brand">"  Доступных вариантов НЕТ !"</string>
+    <string name="name_output_prefix">СЭ" "</string>
+    <string name="name_output_separator1">" от "</string>
+    <string name="name_output_separator2">", "</string>
+    <string name="name_output_postfix">"кг"</string>
+    <string name="name_primer_item1">" Декстроза "</string>
+    <string name="name_primer_item2">" Сахар "</string>
+    <string name="name_primer_item3">" Усилитель "</string>
+    <string name="name_primer_item4">" Загуститель "</string>
+    <string name="hint_primer_weight">Вес, грамм</string>
+    <string name="title_primer_dialog">"   "СОСТАВ ПРАЙМЕРА</string>
+    <string name="message_primer_dialog">Выбраны компоненты :"\n"</string>
+    <string name="alert1_primer_dialog">Праймер жидковат будет?!"\n"</string>
+    <string name="alert2_primer_dialog">Слишком много сахаридов?!"\n"</string>
+    <string name="alert4_primer_dialog">Это похоже на опечатку"\n"</string>
+    <string name="alert8_primer_dialog">Слишком густая смесь !"\n"</string>
+    <string name="alert16_primer_dialog">Мешать ди- и моносахариды грех!"\n"</string>
+    <string name="default_start_time">23</string>
+    <string name="button_start_brew">Начинаем процесс</string>
+    <string name="button_edit_brew">Редактируем процесс</string>
+    <string name="button_start_bottling">Разливать</string>
+    <string name="button_edit_bottling">Редактируем розлив</string>
+    <string name="fermentation_progress_bar_msg1">Решение за гидрозатвором</string>
+    <string name="fermentation_progress_bar_msg2">Ещё не прокисло ?</string>
+    <string name="default_bottled_time">21</string>
+    <string name="char_hour">ч</string>
+    <string name="char_gramm">г</string>
+    <string name="title_wort_temperature">"   "ТЕМПЕРАТУРА СУСЛА</string>
+    <string name="title_ambient_temperature">"   "ТЕМПЕРАТУРА СРЕДЫ</string>
+    <string name="title_brew_result">"  РЕЗУЛЬТАТЫ ТРУДОВ"</string>
+    <string name="msg_brew_result">"Количество бутылок        Объём "</string>
+    <string name="prompt_value_choice">Выбираем значение</string>
+    <string name="dialog_positive_button_save">СОХРАНИТЬ</string>
+    <string name="dialog_positive_button_ok">ОК</string>
+    <string name="dialog_negative_button_cancel">ОТМЕНИТЬ</string>
+    <string name="dialog_negative_button_backstep">НАЗАД</string>
+    <string name="dialog_neutral_button">ПРОПУСТИТЬ</string>
+    <string name="dialog_edit_button">РЕДАКТИРОВАТЬ</string>
+
+    <string name="title_wort_density">"   "ПЛОТНОСТЬ СУСЛА</string>
+    <string name="heading_bottling">Р О З Л И В</string>
+    <string name="heading_product">П Р О Ц Е С С</string>
+    <string name="heading_carbonation">К А Р Б О Н И З А Ц И Я</string>
+    <string name="heading_conditioning">Д О З Р Е В А Н И Е</string>
+    <string name="heading_maturation">В Ы Д Е Р Ж К А</string>
+
 
     <!-- для выдвижной панели -->
     <string name="open_drawer">Open drawer</string>
     <string name="close_drawer">Close drawer</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- строковые константы -->
+    <string name="grad_C">"\u2103"</string>
+    <string name="litr">" л"</string>
+    <string name="vol_percent">" %об.</string>
 
 </resources>

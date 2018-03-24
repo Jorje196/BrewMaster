@@ -3,16 +3,20 @@
     package="jorje196.com.github.brewmaster"
     android:installLocation="auto">
 
+    <uses-sdk android:minSdkVersion="17"
+        android:targetSdkVersion="25" />
 
     <application
         android:allowBackup="true"
-        android:logo="@mipmap/brewer_launcher"
         android:icon="@mipmap/brewer_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/brewer_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainBeerActivity">
+        <activity android:name=".MainBeerActivity"
+            android:label="@string/activity_main_name"
+
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

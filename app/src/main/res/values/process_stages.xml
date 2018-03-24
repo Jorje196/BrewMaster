@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="process_stage">
+        <item>ФЕРМЕНТАЦИЯ</item>
+        <item>КАРБОНИЗАЦИЯ</item>
+        <item>ДОЗРЕВАНИЕ</item>
+        <item>ВЫДЕРЖКА</item>
+        <item>СРОЧНО УПОТРЕБИТЬ</item>
+    </string-array>
+</resources>

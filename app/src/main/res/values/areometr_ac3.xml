@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="areometr_info">"  "АС-3"\n   в %</string>
+    <string name="base_temperature">Базовая температура в градусах Цельсия = 20</string>
+    <string name="correction_constant">Корректирующая температурная константа = 0.05</string>
+    <string name="inflaction_point">Точка перегиба характеристики ареометра = 6.5</string>
+
+</resources>

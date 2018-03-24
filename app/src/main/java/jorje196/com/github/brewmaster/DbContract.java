@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.provider.BaseColumns;
-import android.support.annotation.NonNull;
+//import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 
@@ -36,7 +36,8 @@ public final class DbContract {
 
     static final String _COM = ", ";  // comma
     static final String _PNT = "."; // point
-    static final String GRAD_C = "'\u2103'";
+    static final String GRAD_C = "\u2103";
+    static final String RHO_C = "\u03C1";  // в дец. то 961
     // static final String _SPB = " ";  // spacebar
     static final int BUFFER_STRING_SIZE = 400;  // description может быть длинным !
 
@@ -416,7 +417,7 @@ public final class DbContract {
     // *** Блок методов получения данных из таблиц
 
     // Применение различных вариантов для разных задач (местами ради чистого знания).
-    @NonNull
+
     private static String getInitString(String[][] metaData) {
         StringBuffer result = new StringBuffer(BUFFER_STRING_SIZE);
         for (int i=1; i< metaData.length; i++) {

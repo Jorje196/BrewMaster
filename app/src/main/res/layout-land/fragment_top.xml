@@ -22,9 +22,10 @@
 
     <TextView
         android:id="@+id/top_aphorisms"
+        style="@style/autoscroll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:textSize="28sp"
         android:text=""
 
         app:layout_constraintRight_toLeftOf="@+id/top_imageView"

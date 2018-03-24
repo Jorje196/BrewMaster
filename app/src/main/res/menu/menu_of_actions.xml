@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".MainBeerActivity">
 
+    xmlns:tools="http://schemas.android.com/tools"
+
+    tools:context=".MainBeerActivity">
+    <!-- по целевому набору версий appcompat v7 нужна ли ?
+    если в showAsAction использовать app: , иконки не видны! -->
     <item android:id="@+id/action_search"
         android:title="@string/action_search"
         android:icon="@drawable/ic_search_black_24dp"
@@ -14,37 +17,35 @@
         android:title="@string/action_brew_list"
         android:icon="@drawable/ic_areometer_black_24dp"
         android:orderInCategory="2"
-        app:showAsAction="always" />
+         />
+
+    <item android:id="@+id/action_create_brew"
+        android:title="@string/action_create_brew"
+        android:icon="@drawable/ic_playlist_add_black_24dp"
+        android:orderInCategory="3" />
+
+    <item android:id="@+id/action_edit"
+        android:title="@string/action_edit"
+        android:icon="@drawable/ic_edit_black_24dp"
+        android:orderInCategory="3" />
+
 
     <item android:id="@+id/action_share"
         android:title="@string/action_share"
         android:orderInCategory="7"
-        app:showAsAction="ifRoom"
-        app:actionProviderClass="android.widget.ShareActionProvider" />
-
-    <item android:id="@+id/action_edit_brew"
-        android:title="@string/action_edit_brew"
-        android:icon="@drawable/ic_playlist_add_black_24dp"
-        android:orderInCategory="9"
-        app:showAsAction="ifRoom" />
-
-    <item android:id="@+id/action_create_brew"
-        android:title="@string/action_create_brew"
-        android:icon="@drawable/ic_areometer_black_24dp"
-        android:orderInCategory="3"
-        app:showAsAction="ifRoom" />
+        android:actionProviderClass="android.widget.ShareActionProvider"
+        android:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_saving"
         android:orderInCategory="101"
         android:title="@string/action_saving"
-        app:showAsAction="ifRoom"
-        />
+        app:showAsAction="ifRoom" />
 
 </menu>

@@ -1,92 +1,475 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:id="@+id/fragment_brew"
+    tools:context="jorje196.com.github.brewmaster.MainBeerActivity">
 
-    <!--  TODO добавить горизонтальную ориентацию-->
-    <!--ImageView
-            android:id="@+id/malt_imageView"
-            android:layout_width="220dp"
-            android:layout_height="220dp"
-            android:contentDescription="Can image"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.1"
-            /-->
+    <!--  TODO запретить горизонтальную ориентацию-->
 
+    <TextView
+        android:id="@+id/brew_heading1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginTop="5dp"
+        android:paddingTop="15dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="@string/headingIngredients"
+        />
+
+<!-- step 1 -->
+    <TextView
+        android:id="@+id/malt_name_choosed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/brew_heading1"
+        app:layout_constraintLeft_toLeftOf="parent"
+
+        />
+
+    <Button
+        android:id="@+id/malt_name_choice_b"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_extract_choice"
+        android:textSize="16sp"
+        android:textColor="@color/colorAccentNegative"
+        android:layout_margin="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/brew_heading1"
+        />
+
+
+    <!--Spinner
+        android:id="@+id/brand_name_choose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:spinnerMode="dropdown"
+        android:visibility="invisible"
+        android:textColor="@color/colorPrimary"
+
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/malt_name_choosed"
+        /-->
+
+    <Button
+        android:id="@+id/primer_choose_b"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_primer_choice"
+        android:textSize="16sp"
+        android:textColor="@color/colorAccentNegative"
+        android:layout_margin="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:visibility="invisible"
+        app:layout_constraintTop_toBottomOf="@id/malt_name_choosed"
+        />
+
+    <CheckBox
+        android:id="@+id/primer_item1_selected"
+        android:text="@string/name_primer_item1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp"
+        android:checked="false"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@id/malt_name_choosed"
+        app:layout_constraintTop_toBottomOf="@id/malt_name_choosed"
+        />
+    <EditText
+        android:id="@+id/item1_weight_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textAlignment="center"
+        android:hint="@string/hint_primer_weight"
+        android:inputType="number"
+        android:visibility="gone"
+        android:layout_marginStart="140dp"
+        app:layout_constraintLeft_toLeftOf="@id/primer_item1_selected"
+        app:layout_constraintTop_toTopOf="@id/primer_item1_selected"
+        />
+
+    <CheckBox
+        android:id="@+id/primer_item2_selected"
+        android:text="@string/name_primer_item2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:checked="false"
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="@id/primer_item1_selected"
+        app:layout_constraintTop_toBottomOf="@id/primer_item1_selected"
+        />
+
+    <EditText
+        android:id="@+id/item2_weight_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textAlignment="center"
+        android:hint="@string/hint_primer_weight"
+        android:inputType="number"
+        android:visibility="gone"
+        android:layout_marginStart="140dp"
+        app:layout_constraintLeft_toLeftOf="@id/primer_item2_selected"
+        app:layout_constraintTop_toTopOf="@id/primer_item2_selected"
+        />
+
+    <CheckBox
+        android:id="@+id/primer_item3_selected"
+        android:text="@string/name_primer_item3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:checked="false"
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="@id/primer_item2_selected"
+        app:layout_constraintTop_toBottomOf="@id/primer_item2_selected"
+        />
+
+    <EditText
+        android:id="@+id/item3_weight_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textAlignment="center"
+        android:hint="@string/hint_primer_weight"
+        android:inputType="number"
+        android:visibility="gone"
+        android:layout_marginStart="140dp"
+        app:layout_constraintLeft_toLeftOf="@id/primer_item3_selected"
+        app:layout_constraintTop_toTopOf="@id/primer_item3_selected"
+        />
+
+
+    <CheckBox
+        android:id="@+id/primer_item4_selected"
+        android:text="@string/name_primer_item4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:checked="false"
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="@id/primer_item3_selected"
+        app:layout_constraintTop_toBottomOf="@id/primer_item3_selected"
+        />
+
+    <EditText
+        android:id="@+id/item4_weight_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textAlignment="center"
+        android:hint="@string/hint_primer_weight"
+
+        android:inputType="number"
+        android:visibility="gone"
+        android:layout_marginStart="140dp"
+        app:layout_constraintLeft_toLeftOf="@id/primer_item4_selected"
+        app:layout_constraintTop_toTopOf="@id/primer_item4_selected"
+        />
+
+<!-- step 2 -->
+    <TextView
+        android:id="@+id/primer_choosed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/malt_name_choosed"
+        app:layout_constraintLeft_toLeftOf="parent"
+
+        />
+
+    <Button
+        android:id="@+id/brew_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_start_brew"
+        android:textSize="16sp"
+        android:textColor="@color/colorAccentNegative"
+        android:layout_margin="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/primer_choosed"
+        />
+<!-- step 3 Старт -->
+    <TextView
+        android:id="@+id/brew_heading2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textSize="20sp"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginTop="1dp"
+        android:paddingTop="1dp"
+        app:layout_constraintTop_toBottomOf="@+id/primer_choosed"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="@string/headingStarting"
+        />
+    <RelativeLayout
+        android:id="@+id/fermentation_progress_rl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/brew_heading2"
+        >
+        <ProgressBar
+            android:id="@+id/fermentation_progress"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:visibility="gone"
+            />
         <TextView
-            android:id="@+id/brew_heading1"
-            android:layout_width="wrap_content"
+            android:id="@+id/fermentation_text"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textColor="@color/colorPrimary"
-            android:layout_marginTop="10dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:text="@string/headingIngredients"
+            android:layout_alignBottom="@+id/fermentation_progress"
 
+            android:background="@android:color/transparent"
+            android:textColor="@color/colorPrimaryDark"
+            android:gravity="center"
+            android:text=""
             />
-        <!--TextView
-            android:id="@+id/malt_properties"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:paddingStart="15dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@+id/malt_veriety"
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/start_fermentation_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/fermentation_progress_rl"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        />
+    <TextView
+        android:id="@+id/start_fermentation_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/fermentation_progress_rl"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        />
+    <TextView
+        android:id="@+id/start_fermentation_density"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/fermentation_progress_rl"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.90"
+
+        />
+    <Button
+        android:id="@+id/bottling_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_start_bottling"
+        android:textSize="16sp"
+        android:textColor="@color/colorAccentNegative"
+        android:layout_margin="10dp"
+
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/start_fermentation_date"
+        />
+    <!-- step 4 Розлив -->
+    <TextView
+        android:id="@+id/bottling_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textSize="20sp"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginTop="5dp"
+        android:paddingTop="5dp"
+        app:layout_constraintTop_toBottomOf="@+id/start_fermentation_date"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="@string/heading_bottling"
+        />
+
+    <TextView
+        android:id="@+id/bottling_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/bottling_heading"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        />
+    <TextView
+        android:id="@+id/bottling_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/bottling_heading"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        />
+    <TextView
+        android:id="@+id/bottling_density"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/bottling_heading"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.87"
+        />
+    <TextView
+        android:id="@+id/product_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textSize="20sp"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginTop="5dp"
+        android:paddingTop="5dp"
+        app:layout_constraintTop_toBottomOf="@+id/bottling_date"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="@string/heading_product"
+        />
+    <TextView
+        android:id="@+id/actual_volume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/process_text"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        />
+    <TextView
+        android:id="@+id/alcohol_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/process_text"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        />
+    <TextView
+        android:id="@+id/actual_bitter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/process_text"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.9"
+        />
+    <Button
+        android:id="@+id/carbonation_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_start_bottling"
+        android:textSize="16sp"
+        android:textColor="@color/colorAccentNegative"
+        android:layout_margin="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/process_text"
+        />
+
+    <ProgressBar
+        android:id="@+id/process_progress"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/product_heading"
+        android:visibility="gone"
+        />
+    <ProgressBar
+        android:id="@+id/additional_progress"
+        style="@android:style/Widget.ProgressBar.Small"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/process_text"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:id="@+id/process_text"
+        style="@style/autoscroll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@color/colorPrimary"
+        android:visibility="gone"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/process_progress"
+        android:text=""
             />
-        <TextView
-            android:id="@+id/can_properties"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="5dp"
-            android:textSize="17sp"
-            app:layout_constraintTop_toBottomOf="@+id/malt_properties"
-            />
-        <TextView
-            android:id="@+id/malt_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="5dp"
-            android:textSize="17sp"
-            app:layout_constraintTop_toBottomOf="@+id/can_properties"
-            />
 
-        <Button
-            android:id="@+id/button_fmalt_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="true"
-            android:text="NEXT"
-
-            android:layout_marginTop="15dp"
-            app:layout_constraintTop_toBottomOf="@+id/malt_description"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-
-            app:layout_constraintHorizontal_bias="0.9"
-            />
-        <Button
-            android:id="@+id/button_fmalt_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="true"
-            android:text="PREV"
-
-            android:layout_marginTop="15dp"
-            app:layout_constraintTop_toBottomOf="@+id/malt_description"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-
-            app:layout_constraintHorizontal_bias="0.1"
-            /-->
 
 </android.support.constraint.ConstraintLayout>
 
