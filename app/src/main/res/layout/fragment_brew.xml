@@ -48,7 +48,18 @@
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/brew_heading1"
         />
-
+    <Button
+        android:id="@+id/malt_brand_choice_b"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="И производителя"
+        android:textSize="16sp"
+        android:textColor="@color/colorAccentNegative"
+        android:layout_margin="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/brew_heading1"
+        />
 
     <!--Spinner
         android:id="@+id/brand_name_choose"

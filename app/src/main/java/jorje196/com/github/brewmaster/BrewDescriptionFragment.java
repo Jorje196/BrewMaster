@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 //import android.widget.AdapterView;  это для случая со spinner'ом
 //import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -26,6 +27,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.NumberPicker;
 //import android.widget.Spinner;
 import android.widget.ProgressBar;
@@ -71,10 +73,14 @@ public class BrewDescriptionFragment extends Fragment {
     // Можно формализовать для 2-мерной матрицы этапов/шагов и
     // цикла в цикле, м б будет красиво, но лень
     static final int DESTINATION_UNDEFINED = -1;
-    static final int CHOOSING_INGREDIENTS_MALT_NAME = 11;
-    static final int CHOOSED_INGREDIENTS_MALT_NAME = 12;
-    static final int CHOOSING_INGREDIENTS_MALT_BRAND = 21;
-    static final int CHOOSED_INGREDIENTS_MALT_BRAND = 22;
+    static final int PREPARE_INGREDIENTS_CHOICE = 1;
+    static final int PREPARE_INGREDIENTS_MALT_EXT_CHOICE = 111;
+    static final int CHOOSING_INGREDIENTS_MALT_NAME = 112;
+    static final int CHOOSED_INGREDIENTS_MALT_NAME = 113;
+    static final int PREPARE_MALT_BRAND_CHOICE = 121;
+    static final int CHOOSING_INGREDIENTS_MALT_BRAND = 122;
+    static final int CHOOSED_INGREDIENTS_MALT_BRAND = 123;
+    static final int CHOOSED_INGREDIENTS_MALT_EXT = 124;
     static final int PREPARE_PRIMER_CHOICE = 131;
     static final int CHOOSING_PRIMER_INGREDIENTS_START = 132;
     static final int CHOOSING_PRIMER_INGREDIENTS_EDIT = 133;
@@ -128,8 +134,23 @@ public class BrewDescriptionFragment extends Fragment {
 
     public BrewDescriptionFragment() {
         // Required empty public constructor
-        this.wortGravity = 0;
+        //this.wortGravity = 0;
+        toggleCallRead = false; // не факт что надо
     }
+
+    // Интерфейс для взаимодействия фрагмента с родительской активностью
+    interface BrewDescriptionFLink{
+        void getDrawerToggle();
+        String getMaltExtName();
+        ArrayList[] getMaltExtBrands();
+        int getIdMaltExtName();
+    }
+    BrewDescriptionFLink brewDescriptionFLink;
+    // Переопределяем обработку пунктов меню ActionBar
+    //public boolean onOptionsItemSelected(MenuItem item){
+    //    if ()
+    //    return true;
+    //}
 
     /*
     * Часть идентификаторов рабочих объектов выводим на уровень класса для удобства
@@ -142,13 +163,14 @@ public class BrewDescriptionFragment extends Fragment {
 
     private BrewProcess brewProcess; // идент экземпляра класса варки
     PrimerItem[] primerItems;       //  массив эл-тов вн.класса
-    ArrayList<String> availableBrandName;
+    ArrayList[] availableBrandName;
+    boolean toggleCallRead;
 
     String currentMaltName;
+    int currentMaltNameId;
     String currentBrandName;
     double currentCanWeight;
     String currentPrimer;
-    int currentStep;
 
     // Набор флагов на разные случаи жизни
     boolean modeEditBrewProcess = false;
@@ -159,8 +181,9 @@ public class BrewDescriptionFragment extends Fragment {
         // Элементы интерфейса с пользоватем
     private View layoutBDF;                 // это сам фрагмент
             // Блок выбора экстракта
-    Button buttonMaltNameChoose;    // Кн запуска выбора названия экстракта
+    Button buttonMaltExtChoose;    // Кн запуска выбора названия экстракта
     TextView maltNameChoosed;        // Поле вывода инфы об экстракте
+    Button buttonMaltBrandChoose;         // Кн продолжения формирования полного названия экстракта
     //private Spinner spinnerBrandName;       // Спиннер выбора бренда
     private Button buttonPrimerChoose;      // Кн перехода к выбору состава праймера
 
@@ -184,6 +207,16 @@ public class BrewDescriptionFragment extends Fragment {
         return cortegeId;
     }
 
+    // Для сообщений о некритических событиях в тостике
+    private void infoToast(String message){
+        this.infoToast(message, true);
+    }
+    void infoToast(String message, boolean lasting){
+        Toast toast = Toast.makeText(contextBDF, message,
+                (lasting)? Toast.LENGTH_LONG : Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
     @Override
     public void onAttach(Context context){
         super.onAttach(context);
@@ -193,27 +226,24 @@ public class BrewDescriptionFragment extends Fragment {
     public void onAttach(Activity activity){
         super.onAttach(activity);
         this.contextBDF = activity;
+        try{
+            brewDescriptionFLink = (BrewDescriptionFLink) activity;
+        }catch (ClassCastException e){
+            throw new ClassCastException(activity.toString() +
+                                            " must implement onSomeEventListener");
+        }
     }
-    @Override               // 2 Отмена портретного эксклюзива
+    @Override               // 2* Отмена портретного эксклюзива
     public void onPause(){
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         super.onPause();
     }
-        // Для сообщений о некритических событиях в тостике
-    private void infoToast(String message){
-        this.infoToast(message, true);
-     }
-    void infoToast(String message, boolean lasting){
-        Toast toast = Toast.makeText(contextBDF, message,
-                (lasting)? Toast.LENGTH_LONG : Toast.LENGTH_SHORT);
-        toast.show();
-
-    }
+    //
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // 1 Фрагмент работает тольков портрете (отмену см. 2)
+        // 1 Фрагмент работает тольков портрете (отмену см. 2*)
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         Bundle argsBundle = getArguments();
         setCallSource(argsBundle.getInt(ARG_SOURCE));
@@ -238,9 +268,10 @@ public class BrewDescriptionFragment extends Fragment {
             else brewProcess = new BrewProcess(getCortegeId(), getCallSource());
         }
         //Activity a = getActivity(); // справочно
-        layoutBDF = inflater.inflate(R.layout.fragment_brew, container, false);
+        if (layoutBDF == null)
+            layoutBDF = inflater.inflate(R.layout.fragment_brew, container, false);
 
-        stepHandler(CHOOSING_INGREDIENTS_MALT_NAME);
+        stepHandler(PREPARE_INGREDIENTS_CHOICE);
         return layoutBDF;
     }  //  end  Inflate the layout for this fragment
 
@@ -264,43 +295,80 @@ public class BrewDescriptionFragment extends Fragment {
             case DESTINATION_UNDEFINED:
                 infoToast("Не определена точка перехода", true);
                 break;
-            case CHOOSING_INGREDIENTS_MALT_NAME:
-                // Для вывода информации о выбранном экстракте
+            case PREPARE_INGREDIENTS_CHOICE:
+                if (buttonMaltExtChoose == null)
+                    buttonMaltExtChoose = (Button) layoutBDF.findViewById(R.id.malt_name_choice_b);
+                if (!buttonMaltExtChoose.hasOnClickListeners())
+                    buttonMaltExtChoose.setOnClickListener(buttonMaltExtChooseListener);
+                if (buttonMaltBrandChoose == null)
+                    buttonMaltBrandChoose = (Button) layoutBDF.findViewById(R.id.malt_brand_choice_b);
+                if (!buttonMaltBrandChoose.hasOnClickListeners())
+                    buttonMaltBrandChoose.setOnClickListener(buttonMaltBrandChooseListener);
 
-                currentBrandName = brewProcess.getBrandMaltExt();
+            case PREPARE_INGREDIENTS_MALT_EXT_CHOICE:
                 if ((currentMaltName = brewProcess.getNameMaltExt()).equals(EMPTY_STRING)) {
-                    buttonMaltNameChoose = (Button) layoutBDF.findViewById(R.id.malt_name_choice_b);
-                    buttonMaltNameChoose.setVisibility(View.VISIBLE);
+                    modeEditIngredients = true;
                     currentBrandName = EMPTY_STRING;
-                    buttonMaltNameChoose.setOnClickListener(buttonMaltNameChooseListener);
+                } else {
+                    currentBrandName = brewProcess.getBrandMaltExt();
+                }
+                if (modeEditIngredients) {
+                    buttonMaltExtChoose.setVisibility(View.VISIBLE);
                     break;
                 }
 
-            case CHOOSED_INGREDIENTS_MALT_NAME:
+
+            case CHOOSING_INGREDIENTS_MALT_NAME:
+                if (modeEditIngredients){
+                    if (buttonMaltExtChoose.getVisibility() == View.VISIBLE)
+                        buttonMaltExtChoose.setVisibility(View.INVISIBLE);
+                    brewDescriptionFLink.getDrawerToggle();
+                }
             case CHOOSING_INGREDIENTS_MALT_BRAND:
-                if (currentBrandName.equals(EMPTY_STRING)) {
-                    availableBrandName = getBrandNameBDF(currentMaltName);
-                    //brewProcess.setNameMaltExt(currentMaltName);
-                    buttonMaltNameChoose.setVisibility(View.GONE);
+                if (modeEditIngredients){
+                    buttonMaltBrandChoose.setVisibility(View.VISIBLE);
+                    break;
+                }
+
+
+            case CHOOSED_INGREDIENTS_MALT_NAME:
+                int j; j = 0;
+                if (modeEditIngredients){
+                    // Получаем _id и строку названия выбранного экстракта
+                    currentMaltNameId = brewDescriptionFLink.getIdMaltExtName();
+                    currentMaltName = brewDescriptionFLink.getMaltExtName();
                     // Получаем список доступных брендов и выбираем в диалоге
-                    availableBrandName = getBrandNameBDF(currentMaltName);
-                    // Вариант с диалогом
-                    String[] brandList = new String[availableBrandName.size()];
-                    availableBrandName.toArray(brandList);
-                    int i;  // форматирование для диалога
-                    for (i = 0; i < brandList.length; i++) {
+                    availableBrandName = brewDescriptionFLink.getMaltExtBrands();
+
+                    if (currentMaltNameId < 0){
+                        if (j++ >= 3) {
+                            infoToast("Нет данных из базы");
+                            stepHandler(PREPARE_INGREDIENTS_MALT_EXT_CHOICE);
+                        } else {
+                            stepHandler(CHOOSED_INGREDIENTS_MALT_BRAND);
+                            infoToast("Не поступают данные из базы");
+                        }
+                    }
+                    buttonMaltBrandChoose.setVisibility(View.INVISIBLE);
+                }
+
+            case CHOOSED_INGREDIENTS_MALT_BRAND:
+                if (modeEditIngredients){
+                    // Вариант с диалогом (spinner уж больно криво смотрится )
+                    String[] brandList = new String[availableBrandName[0].size()];
+                    availableBrandName[0].toArray(brandList);
+                    //int i;  // форматирование для диалога
+                    for (int i = 0; i < brandList.length; i++) {
                         brandList[i] = "   ".concat(brandList[i].toUpperCase());
                     }
                     setListDialog(getString(R.string.title_malt_extract_brand),
                             getString(R.string.alert_malt_extract_brand), brandList, false,
                             listDialogOnClickListener, listOnClickListener);
                     break;
-                } else {
-                    // todo если не пусто что делаем ? пока просто вперед
                 }
 
-            case CHOOSED_INGREDIENTS_MALT_BRAND:
-                currentBrandName = availableBrandName.get(numberInList);
+            case CHOOSED_INGREDIENTS_MALT_EXT:
+                currentBrandName = availableBrandName[0].get(numberInList).toString();
                 maltNameChoosed = (TextView) layoutBDF.findViewById(R.id.malt_name_choosed);
                 currentCanWeight = brewProcess.getWeightMaltExtCan();
                 maltNameChoosed.setText(formatMaltAndBrandOutput(currentMaltName, currentBrandName, currentCanWeight));
@@ -396,7 +464,7 @@ public class BrewDescriptionFragment extends Fragment {
                 l = brewProcess.getBeginingDateTimeMls();
                 if (l == 0) {
                     modeEditFermentation = true;
-                    currentDateAndTime.setTimeInMillis(System.currentTimeMillis());
+                    currentDateAndTime.setTimeInMillis(System.currentTimeMillis()); // TODO
                     currentDateAndTime.set(Calendar.MILLISECOND, 0);
                     buttonStartBrew.setText(R.string.button_start_brew);
                 } else {
@@ -482,7 +550,7 @@ public class BrewDescriptionFragment extends Fragment {
                 modeEditFermentation = (bool) ? bool : modeEditFermentation;
                 if (modeEditFermentation)
                     if (ints != null && ints.length == 1) {
-                        setWortTempetature(ints[0]);       // todo убрать на этапе вывода на экран
+                        setWortTempetature(ints[0]);
                         brewProcess.setBeginningWortTempereture(ints[0]);
                     } else {
                         infoToast("Проблемы с температурой сусла: Не 1 ");
@@ -610,9 +678,9 @@ public class BrewDescriptionFragment extends Fragment {
                 long lb;
                 lb = brewProcess.getDurationOfFermentationMls();
                 if (lb == 0) {
-                    modeEditBottling = true;                // todo
+                    modeEditBottling = true;
                     currentDateAndTime.setTimeInMillis(brewProcess.getBeginingDateTimeMls() +
-                            brewProcess.getMinFermentationDurationHrs() * HOUR_IN_MLS);  // todo выбирать изтекущего и + мин ферментации
+                            brewProcess.getMinFermentationDurationHrs() * HOUR_IN_MLS);
                     buttonBottling.setText(R.string.button_start_bottling);
                 } else {
                     currentDateAndTime.setTimeInMillis(brewProcess.getBeginingDateTimeMls() + lb);
@@ -676,7 +744,7 @@ public class BrewDescriptionFragment extends Fragment {
                 modeEditFermentation = (bool) ? bool : modeEditBottling;
                 if (modeEditBottling)
                     if (ints != null && ints.length == 1) {
-                        setWortTempetature(ints[0]);       // todo убрать на этапе вывода на экран
+                        setWortTempetature(ints[0]);
                         brewProcess.setBottlingWortTemperature(ints[0]);
                     } else {
                         infoToast("Проблемы с температурой сусла: Не 1 ");
@@ -801,7 +869,6 @@ public class BrewDescriptionFragment extends Fragment {
 
                 infoToast("UCB - MODE !?");
                 break;
-                //// todo открыть кнопку НАЧАЛО или вернуться к диалогу вернуться ?
             }
         }
 
@@ -1217,21 +1284,37 @@ public class BrewDescriptionFragment extends Fragment {
         return getString(R.string.name_output_prefix) + malt + getString(R.string.name_output_separator1) + brand + ", " + Double.toString(canWeight) + getString(R.string.name_output_postfix);
 
     }
-    // Реакция на нажатие Кн выбора названия охмеленки
-    OnClickListener buttonMaltNameChooseListener = new OnClickListener() {
+    // Реакции на нажатие Кн выбора названия охмеленки и марки
+    OnClickListener buttonMaltExtChooseListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            currentMaltName = getMaltNameBDF();
+            stepHandler(CHOOSING_INGREDIENTS_MALT_NAME);
+        }
+    };
+    OnClickListener buttonMaltBrandChooseListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
             stepHandler(CHOOSED_INGREDIENTS_MALT_NAME);
         }
-
     };
+    // реализуем слушателя к выдвижному списку
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            /* видимо, так :
+            parent - ListView; view - элемент списка (тут строка) , далее её позиция и id
+             */
+            int i = 0;
+            i++;
+            //selectDrawerItem(position, id);
+        }
+    }
 
     //***  Блок выбора бренда.  Вариант с AlertDialog со списком
     //     На входе ArrayList с доступными для выбранного названия брендами
     private AlertDialog.Builder listDialogBuilder;
     //  Переменные для взаимодействия слушателей метода setListDialog
-    int numberInList;
+    private int numberInList;   // todo с номером криво как-то
 
     // Слушатель для обработки списка в диалоге выбора бренда
     DialogInterface.OnClickListener listOnClickListener = new DialogInterface.OnClickListener() {
@@ -1250,7 +1333,7 @@ public class BrewDescriptionFragment extends Fragment {
                     stepHandler(CHOOSING_INGREDIENTS_MALT_NAME);
                     break;
                 case BUTTON_POSITIVE:
-                    stepHandler(CHOOSED_INGREDIENTS_MALT_BRAND);
+                    stepHandler(CHOOSED_INGREDIENTS_MALT_EXT);
                     break;
                 default:
                     infoToast("Где такая кнопка ?!");

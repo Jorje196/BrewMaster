@@ -14,7 +14,6 @@ import static jorje196.com.github.brewmaster.DbContract.DbBrands.COLUMN_BRANDS_B
 import static jorje196.com.github.brewmaster.DbContract.DbBrands.COLUMN_BRANDS_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbBrands.TABLE_BRANDS;
 import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_ALC_PERCENT;
-import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_BITTER;
 import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_PROCESS_STATE;
 import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_START_DATA;
@@ -37,7 +36,6 @@ import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIE
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_NAME_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.TABLE_VERIETIES;
 import static jorje196.com.github.brewmaster.DbContract._COM;
-import static jorje196.com.github.brewmaster.DbContract._PNT;
 
 /**
  * Created by User on 20.12.2017.
@@ -112,17 +110,17 @@ public  class BrewListFragment extends ListFragment {
     }  // end BrewListSimpeCursorAdapter
 
     // Интерфейс для связи (передачи информации в родительскую активность
-    interface FragBrewListLink {
+    interface BrewListFLink {
         void getFBLL(ListFragment fragment, String tag);
     }
 
-    FragBrewListLink onFragBrewListLink;
+    BrewListFLink brewListFLink;
 
     @Override
     public void onAttach(Activity context) {    // Activity, not Context, else NullPointerException
         super.onAttach(context);                // todo связано с вер.API (с 24 это Context
         try {
-            onFragBrewListLink = (FragBrewListLink) context;
+            brewListFLink = (BrewListFLink) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement onSomeEventListener");
         }
@@ -132,7 +130,7 @@ public  class BrewListFragment extends ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        onFragBrewListLink.getFBLL(this, BLF_TAG);
+        brewListFLink.getFBLL(this, BLF_TAG);
         // TODO Для исключения утечки памяти надо открывать и закрывать курсоры для адаптера в callback'ах по onActivityCreate и ? onDesrtoy ?
 
     }

@@ -29,13 +29,19 @@ public class BrewProcess {
     String getNameMaltExt() {
         return nameMaltExt;
     }
-    // todo может понадобиться _id ?
     private String brandMaltExt;
     String getBrandMaltExt() {
         return brandMaltExt;
     }
     void setBrandMaltExt(String brandMaltExt) {
         this.brandMaltExt = brandMaltExt;
+    }
+    private int idNameMaltExt;
+    int getIdNameMaltExt() {
+        return idNameMaltExt;
+    }
+    void setIdNameMaltExt(int idNameMaltExt) {
+        this.idNameMaltExt = idNameMaltExt;
     }
 
     //

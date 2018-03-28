@@ -12,16 +12,13 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarDrawerToggle;
 
 import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
@@ -31,15 +28,18 @@ import android.widget.SimpleCursorAdapter;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 import jorje196.com.github.brewmaster.MaltExtDescriptionFragment.FragMaltLink;
-import jorje196.com.github.brewmaster.BrewListFragment.FragBrewListLink;
+import jorje196.com.github.brewmaster.BrewListFragment.BrewListFLink;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 
 import static android.view.MenuItem.SHOW_AS_ACTION_ALWAYS;
 import static jorje196.com.github.brewmaster.BrewDescriptionFragment.ARG_CORTEGE_ID;
 import static jorje196.com.github.brewmaster.BrewDescriptionFragment.ARG_SOURCE;
-import static jorje196.com.github.brewmaster.BrewDescriptionFragment.BDF_TAG;
 import static jorje196.com.github.brewmaster.BrewListFragment.BLF_TAG;
 import static jorje196.com.github.brewmaster.BrewListFragment.SQL_BREW_LIST;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW1_STR;
@@ -47,16 +47,8 @@ import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW2_STR;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW3_STR;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW4_STR;
 import static jorje196.com.github.brewmaster.DbContract.DbBrands.getBrand;
-import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_FINAL_TEMP;
-import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_ID;
-import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_START_DATA;
-import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_START_WORT_TEMP;
-import static jorje196.com.github.brewmaster.DbContract.DbBrews.COLUMN_BREWS_VOLUME;
-import static jorje196.com.github.brewmaster.DbContract.DbBrews.TABLE_BREWS;
-import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_VOLUME;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_WEIGHT;
-import static jorje196.com.github.brewmaster.DbContract.DbCans.TABLE_CANS;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.getCanCortegeById;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.getCanWeight;
 import static jorje196.com.github.brewmaster.DbContract.DbNames.COLUMN_NAMES_ID;
@@ -68,13 +60,9 @@ import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIE
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_CAN_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_COLOR;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_DESCRIPTION;
-import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_NAME_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_SRCIMG;
-import static jorje196.com.github.brewmaster.DbContract.DbVerieties.TABLE_VERIETIES;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.getVerietyCortegeById;
-import static jorje196.com.github.brewmaster.DbContract._COM;
-import static jorje196.com.github.brewmaster.DbContract._PNT;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_BITTER;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_BRAND;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_COLOR;
@@ -88,7 +76,7 @@ import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_VOLU
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_WEIGHT;
 
 
-public class MainBeerActivity extends Activity implements FragMaltLink, FragBrewListLink {
+public class MainBeerActivity extends Activity implements FragMaltLink, BrewListFLink, BrewDescriptionFragment.BrewDescriptionFLink {
     static final String TAG_FOR_ALL = "visible_fragment";
     static final int TOP_FRAG_NUM = 1;              // TopFragment
     static final int MALT_EXT_DESCRIPT_NUM = 2;     // MaltExtDescriptionFragment
@@ -220,7 +208,44 @@ public class MainBeerActivity extends Activity implements FragMaltLink, FragBrew
         return fragmentNum;
     }
 
-    // TODO В реализациях методов связи интерфейсов фрагментов : ? нежен ли tag как параметр в обращении ? фрагмент известен и так
+    // TODO В реализациях методов связи интерфейсов фрагментов
+    private int idMaltExtName;
+    private void setIdMaltExtName(int idMaltExtName) {
+        this.idMaltExtName = idMaltExtName;
+    }
+    private String maltExtName;
+    private void setMaltExtName(String maltExtName) {
+        this.maltExtName = maltExtName;
+    }
+    private ArrayList[] maltAvailableBrands;
+    public void setMaltAvailableBrands(ArrayList[] maltAvailableBrands) {
+        this.maltAvailableBrands = maltAvailableBrands;
+    }
+
+    // Реализация метода изменения состояния выдвижной панели (BDF)
+    @Override
+    public void getDrawerToggle(){
+        int i=0, j; j = 1;
+        setIdMaltExtName(-1);
+        MenuItem itemHome = new MenuItemStub(android.R.id.home);
+        onOptionsItemSelected(itemHome);
+
+    }
+    @Override
+    public String getMaltExtName(){
+        return maltExtName;
+    }
+    @Override
+    public ArrayList[] getMaltExtBrands(){
+        return maltAvailableBrands;
+    }
+    @Override
+    public int getIdMaltExtName(){
+        int res = idMaltExtName;
+        idMaltExtName = -1; // надо ли ?
+        return res;
+    }
+
     /* Реализация (абстрактного) метода связи getFBLL (BrewListFra...) с родительской активностью */
     @Override
     public void getFBLL(ListFragment fragment, String tag) {
@@ -293,34 +318,36 @@ public class MainBeerActivity extends Activity implements FragMaltLink, FragBrew
         }
     }
 
-    //
 
     // Обработка выбранного пункта выдвижного списка
     private void selectDrawerItem(int position, long id){
-        Fragment fragment;
-        // выбор фрагмента, передача ему параметров и запуск
-        switch ((int)id) {
-            case 0 :
-                fragment = new TopFragment();
-                break;
-            default : {
-                fragment = new MaltExtDescriptionFragment();
-                setCurrentPositionInList(0);
-                setChoosedId((int)id);
-
-                prepareMaltFragment(fragment, getChoosedId(), brewDb);
-
+        if (searchCurrentFragment() != BREW_DESCRIPT_FRAG_NUM) {
+            Fragment fragment;
+            // выбор фрагмента, передача ему параметров и запуск
+            switch ((int) id) {
+                case 0:
+                    fragment = new TopFragment();
+                    break;
+                default: {
+                    fragment = new MaltExtDescriptionFragment();
+                    setCurrentPositionInList(0);
+                    setChoosedId((int) id);
+                    prepareMaltFragment(fragment, getChoosedId(), brewDb);
+                }
             }
+            // выводим фрагмент с исп транзакции фрагмента
+            startFragment(fragment, TAG_FOR_ALL);
+        } else {
+            int _id; _id = (int)id;
+            setIdMaltExtName(_id);
+            setMaltExtName(getMaltExtNameById(_id));
+            setMaltAvailableBrands(getAvailableMaltBrandsByNameId(_id));
         }
-
-        // выводим фрагмент с исп транзакции фрагмента
-        startFragment(fragment, TAG_FOR_ALL);
-
         drawerLayout.closeDrawer(drawerList); // пункт выбран => закрываем выдвижную панель
 
     }
     //  Метод выполняет стандартные шаги подготовки фраг. описания Malt
-    void prepareMaltFragment(Fragment fragment, int id, SQLiteDatabase db) {
+    void  prepareMaltFragment(Fragment fragment, int id, SQLiteDatabase db) {
         ArrayList<String> stringId;
         stringId = DbContract.DbVerieties.getVerietyIdByNameId(db, id);
         setNumVerietiesInList(stringId.size());
@@ -335,11 +362,37 @@ public class MainBeerActivity extends Activity implements FragMaltLink, FragBrew
     void startFragment(Fragment fragment, String tag) {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.content_frame, fragment, tag);
-        ft.addToBackStack(null);                // TODO может не копить фрагменты ?
+        ft.addToBackStack(null);
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE );
         ft.commit();
 
     }
+
+    // Метод получает из Db строковое представление названия экстракта
+    private String getMaltExtNameById(int id){
+        String strMaltExtName = "";     // todo Подчистить код
+        strMaltExtName = DbContract.DbNames.getName(brewDb, id);
+        return strMaltExtName;
+    }
+    private ArrayList<String>[] getAvailableMaltBrandsByNameId(int id){
+        ArrayList[] listBrands = new ArrayList[2];
+
+        ArrayList<String> listNameBrands; // = new ArrayList<>(); это избыточно
+        ArrayList<String> listIdBrands = new ArrayList<>();
+        String _str;
+        listNameBrands = DbContract.DbVerieties.getVerietyIdByNameId(brewDb, id);
+        for (int i = 0; i < listNameBrands.size(); i++) {
+            _str = (DbContract.DbVerieties.getVerietyCortegeById(brewDb, listNameBrands.get(i)).getAsString(DbContract.DbVerieties.COLUMN_VERIETIES_BRAND_ID));
+            listIdBrands.add(i, _str);
+            listNameBrands.set(i, DbContract.DbBrands.getBrand(brewDb, _str));
+        }
+        if (listIdBrands.size() == listNameBrands.size()) {
+            listBrands[0] = listNameBrands;
+            listBrands[1] = listIdBrands;
+        }
+        return listBrands;
+    }
+
 
     /* Метод получает из Db информацию для отображения во фрагменте MaltExtDesc...
     Обрабатывает её и готовит пакет к передаче . Можно и ArrayList, но читаемость ухудшается */
@@ -413,15 +466,10 @@ public void maltChoiseInBrewDescription(View view) {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Чтобы объект ActionBarDrawerToggle реагировал на выбор (клики, щелчки ..)
-        int i=0;
-        if (item.getItemId()==android.R.id.home ){
-
-            i++;
-        }
-
+// drawerToggle.
         if (drawerToggle != null && drawerToggle.onOptionsItemSelected(item)) return true;
-        i++;
-        switch (i = item.getItemId()) {
+        //i++;
+        switch (item.getItemId()) {
             case R.id.action_search:
                 return true;
             case R.id.action_brew_list:
@@ -449,223 +497,12 @@ public void maltChoiseInBrewDescription(View view) {
 
                 return true;
             case R.id.action_settings:
-
-                MenuItem item1 = new MenuItem() {
-                    @Override
-                    public int getItemId() {
-                        return android.R.id.home;
-                    }
-
-                    @Override
-                    public int getGroupId() {
-                        return 0;
-                    }
-
-                    @Override
-                    public int getOrder() {
-                        return 0;
-                    }
-
-                    @Override
-                    public MenuItem setTitle(CharSequence title) {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setTitle(int title) {
-                        return null;
-                    }
-
-                    @Override
-                    public CharSequence getTitle() {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setTitleCondensed(CharSequence title) {
-                        return null;
-                    }
-
-                    @Override
-                    public CharSequence getTitleCondensed() {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setIcon(Drawable icon) {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setIcon(int iconRes) {
-                        return null;
-                    }
-
-                    @Override
-                    public Drawable getIcon() {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setIntent(Intent intent) {
-                        return null;
-                    }
-
-                    @Override
-                    public Intent getIntent() {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setShortcut(char numericChar, char alphaChar) {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setNumericShortcut(char numericChar) {
-                        return null;
-                    }
-
-                    @Override
-                    public char getNumericShortcut() {
-                        return 0;
-                    }
-
-                    @Override
-                    public MenuItem setAlphabeticShortcut(char alphaChar) {
-                        return null;
-                    }
-
-                    @Override
-                    public char getAlphabeticShortcut() {
-                        return 0;
-                    }
-
-                    @Override
-                    public MenuItem setCheckable(boolean checkable) {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isCheckable() {
-                        return false;
-                    }
-
-                    @Override
-                    public MenuItem setChecked(boolean checked) {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isChecked() {
-                        return false;
-                    }
-
-                    @Override
-                    public MenuItem setVisible(boolean visible) {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isVisible() {
-                        return false;
-                    }
-
-                    @Override
-                    public MenuItem setEnabled(boolean enabled) {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isEnabled() {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean hasSubMenu() {
-                        return false;
-                    }
-
-                    @Override
-                    public SubMenu getSubMenu() {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setOnMenuItemClickListener(OnMenuItemClickListener menuItemClickListener) {
-                        return null;
-                    }
-
-                    @Override
-                    public ContextMenu.ContextMenuInfo getMenuInfo() {
-                        return null;
-                    }
-
-                    @Override
-                    public void setShowAsAction(int actionEnum) {
-
-                    }
-
-                    @Override
-                    public MenuItem setShowAsActionFlags(int actionEnum) {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setActionView(View view) {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setActionView(int resId) {
-                        return null;
-                    }
-
-                    @Override
-                    public View getActionView() {
-                        return null;
-                    }
-
-                    @Override
-                    public MenuItem setActionProvider(ActionProvider actionProvider) {
-                        return null;
-                    }
-
-                    @Override
-                    public ActionProvider getActionProvider() {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean expandActionView() {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean collapseActionView() {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean isActionViewExpanded() {
-                        return false;
-                    }
-
-                    @Override
-                    public MenuItem setOnActionExpandListener(OnActionExpandListener listener) {
-                        return null;
-                    }
-                };
-                onOptionsItemSelected(item1);
                 return true;
             case R.id.action_saving:
                 return true;
-            case android.R.id.home:
+//            case android.R.id.home:
 
-
-                i = 1;
             default:
-                i++;
                 return super.onOptionsItemSelected(item);
 
         }
