@@ -14,6 +14,7 @@ import android.app.Fragment;
 import android.os.IBinder;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -144,6 +145,7 @@ public class BrewDescriptionFragment extends Fragment {
         String getMaltExtName();
         ArrayList[] getMaltExtBrands();
         int getIdMaltExtName();
+        void getExitFragment();
     }
     BrewDescriptionFLink brewDescriptionFLink;
     // Переопределяем обработку пунктов меню ActionBar
@@ -289,8 +291,17 @@ public class BrewDescriptionFragment extends Fragment {
         this.stepHandler(destinaitionPoint, bool, null, doubles);
     }
 
-    void stepHandler(int destinaitionPoint, boolean bool, int[] ints, double[] doubles){
+    private int attamptCount;
+    private int incAttamptCount() {
+        return ++attamptCount;
+    }
 
+    public void clearAttamptCount() {
+        this.attamptCount = 0;
+    }
+
+    void stepHandler(int destinaitionPoint, boolean bool, int[] ints, double[] doubles){
+        int j; j = 0;
         switch(destinaitionPoint) {
             case DESTINATION_UNDEFINED:
                 infoToast("Не определена точка перехода", true);
@@ -304,6 +315,8 @@ public class BrewDescriptionFragment extends Fragment {
                     buttonMaltBrandChoose = (Button) layoutBDF.findViewById(R.id.malt_brand_choice_b);
                 if (!buttonMaltBrandChoose.hasOnClickListeners())
                     buttonMaltBrandChoose.setOnClickListener(buttonMaltBrandChooseListener);
+                buttonMaltBrandChoose.setText("и  производителя");
+                clearAttamptCount();
 
             case PREPARE_INGREDIENTS_MALT_EXT_CHOICE:
                 if ((currentMaltName = brewProcess.getNameMaltExt()).equals(EMPTY_STRING)) {
@@ -332,23 +345,34 @@ public class BrewDescriptionFragment extends Fragment {
 
 
             case CHOOSED_INGREDIENTS_MALT_NAME:
-                int j; j = 0;
+
                 if (modeEditIngredients){
-                    // Получаем _id и строку названия выбранного экстракта
-                    currentMaltNameId = brewDescriptionFLink.getIdMaltExtName();
+                    // Получаем _id выбранного экстракта
+                    if ((currentMaltNameId = brewDescriptionFLink.getIdMaltExtName())< 0){
+                        int i; String s;
+                        if ((i = incAttamptCount()) < 3) {
+                            switch (i){
+                                case 1:
+                                    s = "и  ещё  разок"; break;
+                                case 2:
+                                    s = "последняя попытка"; break;
+                                default: s = "Так не бывает";
+                            }
+                            buttonMaltBrandChoose.setText(s);
+                            stepHandler(PREPARE_INGREDIENTS_MALT_EXT_CHOICE);
+                            infoToast("Нет данных из базы");
+                            break;
+                        } else {
+                            brewDescriptionFLink.getExitFragment();
+                            //stepHandler(PREPARE_INGREDIENTS_MALT_EXT_CHOICE);
+                            //infoToast("Не поступают данные из базы", true);
+                            break;
+                        }
+                    }
+                    // и строку названия выбранного экстракта
                     currentMaltName = brewDescriptionFLink.getMaltExtName();
                     // Получаем список доступных брендов и выбираем в диалоге
                     availableBrandName = brewDescriptionFLink.getMaltExtBrands();
-
-                    if (currentMaltNameId < 0){
-                        if (j++ >= 3) {
-                            infoToast("Нет данных из базы");
-                            stepHandler(PREPARE_INGREDIENTS_MALT_EXT_CHOICE);
-                        } else {
-                            stepHandler(CHOOSED_INGREDIENTS_MALT_BRAND);
-                            infoToast("Не поступают данные из базы");
-                        }
-                    }
                     buttonMaltBrandChoose.setVisibility(View.INVISIBLE);
                 }
 
@@ -376,7 +400,8 @@ public class BrewDescriptionFragment extends Fragment {
                 // Сохраняем полученные данные в экземпляре варки
                 brewProcess.setNameMaltExt(currentMaltName);
                 brewProcess.setBrandMaltExt(currentBrandName);
-                brewProcess.setWeightMaltExt(currentCanWeight);
+                // todo туда же и ID
+                brewProcess.setWeightMaltExt(currentCanWeight);     // это из базы
 
             case PREPARE_PRIMER_CHOICE:
                 initPrimerItemsList();
@@ -1044,7 +1069,14 @@ public class BrewDescriptionFragment extends Fragment {
         };
     }  // end WrpDatePickerDialog
 
-
+/*    @Override     todo Посмотреть как сработает
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int i;
+        i=0;
+        i++;
+        super.onOptionsItemSelected(item);
+        return true;
+    }  */
     boolean viewHour24 = true;
     //  Диалог выбора времени
     void setTimeDialog(int hour, int minute){
@@ -1297,6 +1329,7 @@ public class BrewDescriptionFragment extends Fragment {
             stepHandler(CHOOSED_INGREDIENTS_MALT_NAME);
         }
     };
+
     // реализуем слушателя к выдвижному списку
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
@@ -1357,22 +1390,6 @@ public class BrewDescriptionFragment extends Fragment {
         AlertDialog dialog = listDialogBuilder.create();
         dialog.setInverseBackgroundForced(false);  // todo проверить
         dialog.show();
-    }
-        // Имитация выбора
-    String getMaltNameBDF(){        // todo зменить заглушку
-        return "Indian Pale Ale (IPA)";
-    };
-    String[] getBrandNameBDF_str(String maltName){
-        String[]res = {"Coopers", "Muntons", "Finlandia", "Inpinto", "", "ВЫБОР БРЭНДА"};
-        return res;
-    }
-    ArrayList<String> getBrandNameBDF(String maltName){
-        ArrayList<String> res = new ArrayList<>();
-        res.add("Coopers");
-        res.add("Muntons");
-        res.add("Finlandia");
-        res.add("Inpinto");
-        return res;
     }
 
     //***  Внутренний класс пункта компонента праймера

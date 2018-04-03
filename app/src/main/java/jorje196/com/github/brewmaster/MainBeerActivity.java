@@ -245,6 +245,11 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
         idMaltExtName = -1; // надо ли ?
         return res;
     }
+    @Override
+    public void getExitFragment(){
+        infoToast("Не удалось получить данные из базы");
+        onBackPressed();
+    }
 
     /* Реализация (абстрактного) метода связи getFBLL (BrewListFra...) с родительской активностью */
     @Override
@@ -374,7 +379,7 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
         strMaltExtName = DbContract.DbNames.getName(brewDb, id);
         return strMaltExtName;
     }
-    private ArrayList<String>[] getAvailableMaltBrandsByNameId(int id){
+    private ArrayList[] getAvailableMaltBrandsByNameId(int id){
         ArrayList[] listBrands = new ArrayList[2];
 
         ArrayList<String> listNameBrands; // = new ArrayList<>(); это избыточно
@@ -393,6 +398,15 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
         return listBrands;
     }
 
+    // Для сообщений о некритических событиях в тостике
+    private void infoToast(String message){
+        this.infoToast(message, true);
+    }
+    void infoToast(String message, boolean lasting){
+        Toast toast = Toast.makeText(cntMBA, message,
+                (lasting)? Toast.LENGTH_LONG : Toast.LENGTH_SHORT);
+        toast.show();
+    }
 
     /* Метод получает из Db информацию для отображения во фрагменте MaltExtDesc...
     Обрабатывает её и готовит пакет к передаче . Можно и ArrayList, но читаемость ухудшается */
@@ -456,7 +470,7 @@ public void maltChoiseInBrewDescription(View view) {
     }
     // Метод создает интент и передает его провайдеру действия (для action_share)
     private void setIntent(String text){
-        Intent intent = new Intent(Intent.ACTION_SEND);
+        Intent intent = new Intent(Intent.ACTION_SEND); // todo корректировать, пусть возвращает интент
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, text);
         shareActionProvider.setShareIntent(intent);

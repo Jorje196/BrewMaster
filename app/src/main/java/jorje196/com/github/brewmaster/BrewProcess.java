@@ -151,7 +151,7 @@ public class BrewProcess {
         return ((long)beginingDateTimeHrs)*HOUR_IN_MLS;
     }
         // Возвращает int часы от Начала времен
-    public int getBeginingDateTimeHrs() {
+        int getBeginingDateTimeHrs() {
         return beginingDateTimeHrs;
     }
         // Сохр. int часов от Начала вр. из long mls календаря
@@ -428,7 +428,7 @@ public class BrewProcess {
         this.weightMaltExt = 0;             //setWeightMaltExt(0);
         this.weightMaltExtCan = 1.7;        //setWeightMaltExtCan(1.7);
         // **** В части праймера
-        this.weightDextrosa = 1000;         //setWeightDextrosa(1000);
+        this.weightDextrosa = 0;         //setWeightDextrosa(1000);
         this.weightSugar = 0;               //setWeightSugar(0);
         this.weightEnhancer = 0;            //setWeightEnhancer(0);
         this.weightThickener = 0;           //setWeightThickener(150);
