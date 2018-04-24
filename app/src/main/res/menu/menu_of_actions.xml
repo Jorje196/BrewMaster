@@ -11,23 +11,30 @@
         android:title="@string/action_search"
         android:icon="@drawable/ic_search_black_24dp"
         android:orderInCategory="1"
-        app:showAsAction="always" />
+        android:showAsAction="ifRoom"
+        tools:ignore="AppCompatResource"/>
 
     <item android:id="@+id/action_brew_list"
         android:title="@string/action_brew_list"
         android:icon="@drawable/ic_areometer_black_24dp"
         android:orderInCategory="2"
+        android:showAsAction="always"
+        tools:ignore="AppCompatResource"
          />
 
     <item android:id="@+id/action_create_brew"
         android:title="@string/action_create_brew"
         android:icon="@drawable/ic_playlist_add_black_24dp"
-        android:orderInCategory="3" />
+        android:orderInCategory="3"
+        android:showAsAction="always"
+        tools:ignore="AppCompatResource"/>
 
     <item android:id="@+id/action_edit"
         android:title="@string/action_edit"
         android:icon="@drawable/ic_edit_black_24dp"
-        android:orderInCategory="3" />
+        android:orderInCategory="5"
+        android:showAsAction="ifRoom"
+        tools:ignore="AppCompatResource"/>
 
 
     <item android:id="@+id/action_share"
@@ -47,6 +54,8 @@
         android:id="@+id/action_saving"
         android:orderInCategory="101"
         android:title="@string/action_saving"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_save_black_24dp"
+        android:showAsAction="ifRoom"
+        tools:ignore="AppCompatResource" />
 
 </menu>

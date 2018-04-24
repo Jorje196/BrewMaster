@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.IBinder;
@@ -43,8 +44,10 @@ import java.util.Date;
 
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
+import static android.os.Build.*;
 import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
 import static android.view.inputmethod.EditorInfo.IME_ACTION_NEXT;
+import jorje196.com.github.brewmaster.AreometerAC3;
 import static jorje196.com.github.brewmaster.BrewProcess.HOUR_IN_MLS;
 import static jorje196.com.github.brewmaster.BrewProcess.NUL_TEMPERATURE;
 import static jorje196.com.github.brewmaster.BrewProcess.PRIMER_COMPAUND;
@@ -146,6 +149,8 @@ public class BrewDescriptionFragment extends Fragment {
         ArrayList[] getMaltExtBrands();
         int getIdMaltExtName();
         void getExitFragment();
+        void setMenuItemsBDF();
+        void setDrawerDenied(boolean allowed);
     }
     BrewDescriptionFLink brewDescriptionFLink;
     // Переопределяем обработку пунктов меню ActionBar
@@ -159,9 +164,7 @@ public class BrewDescriptionFragment extends Fragment {
     * исследования путей решения задачи через написание для них разных методов с теми
     * же актерами */
 
-    Context contextBDFc;
     private Context contextBDF;
-    //private Activity contextBDF;
 
     private BrewProcess brewProcess; // идент экземпляра класса варки
     PrimerItem[] primerItems;       //  массив эл-тов вн.класса
@@ -219,26 +222,44 @@ public class BrewDescriptionFragment extends Fragment {
         toast.show();
     }
 
+
     @Override
-    public void onAttach(Context context){
+    public void onAttach(Context context){ // с API 23 Context
         super.onAttach(context);
-        this.contextBDFc = context;
+        if(VERSION.SDK_INT >= VERSION_CODES.M) {
+            this.contextBDF = context;
+            try {
+                brewDescriptionFLink = (BrewDescriptionFLink) context;
+            } catch (ClassCastException e) {
+                throw new ClassCastException(context.toString() +
+                        " must implement onSomeEventListener");
+            }
+        }
     }
     @Override
     public void onAttach(Activity activity){
         super.onAttach(activity);
-        this.contextBDF = activity;
-        try{
-            brewDescriptionFLink = (BrewDescriptionFLink) activity;
-        }catch (ClassCastException e){
-            throw new ClassCastException(activity.toString() +
-                                            " must implement onSomeEventListener");
+        if(VERSION.SDK_INT < VERSION_CODES.M) {
+            this.contextBDF = activity;
+            try {
+                brewDescriptionFLink = (BrewDescriptionFLink) activity;
+            } catch (ClassCastException e) {
+                throw new ClassCastException(activity.toString() +
+                        " must implement onSomeEventListener");
+            }
         }
     }
     @Override               // 2* Отмена портретного эксклюзива
     public void onPause(){
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        brewDescriptionFLink.setDrawerDenied(false);
         super.onPause();
+    }
+
+    @Override
+    public void onResume(){
+        //brewDescriptionFLink.setMenuItemsBDF();
+        super.onResume();
     }
     //
 
@@ -247,6 +268,8 @@ public class BrewDescriptionFragment extends Fragment {
                              Bundle savedInstanceState) {
         // 1 Фрагмент работает тольков портрете (отмену см. 2*)
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        // Откл. возможность вызова/закрытия выдвижной панели рукой
+        brewDescriptionFLink.setDrawerDenied(true);
         Bundle argsBundle = getArguments();
         setCallSource(argsBundle.getInt(ARG_SOURCE));
         setCortegeId(argsBundle.getInt(ARG_CORTEGE_ID));
@@ -256,11 +279,7 @@ public class BrewDescriptionFragment extends Fragment {
         currentDateAndTime.setTimeInMillis(0);  // уст. текущего календаря в 0
         long t = currentDateAndTime.getTimeInMillis();
         Date d = currentDateAndTime.getTime();
-        /*if(contextBDFc==null) {  // todo как с версиями API разбираться ? Activity/Context
-            contextBDFc = MainBeerActivity.getCntMBA();
-            int i = 0;
-            i++;
-        }*/
+
         // Создаем экземпляр класса BrewProcess, с которым будем работать
         if(brewProcess == null) {
             if (getCortegeId() == 0)
@@ -315,7 +334,7 @@ public class BrewDescriptionFragment extends Fragment {
                     buttonMaltBrandChoose = (Button) layoutBDF.findViewById(R.id.malt_brand_choice_b);
                 if (!buttonMaltBrandChoose.hasOnClickListeners())
                     buttonMaltBrandChoose.setOnClickListener(buttonMaltBrandChooseListener);
-                buttonMaltBrandChoose.setText("и  производителя");
+                buttonMaltBrandChoose.setText("выбор производителя");
                 clearAttamptCount();
 
             case PREPARE_INGREDIENTS_MALT_EXT_CHOICE:
@@ -400,8 +419,9 @@ public class BrewDescriptionFragment extends Fragment {
                 // Сохраняем полученные данные в экземпляре варки
                 brewProcess.setNameMaltExt(currentMaltName);
                 brewProcess.setBrandMaltExt(currentBrandName);
+                modeEditIngredients = false;
                 // todo туда же и ID
-                brewProcess.setWeightMaltExt(currentCanWeight);     // это из базы
+                brewProcess.setWeightMaltExt(currentCanWeight);     // todo это делать из базы
 
             case PREPARE_PRIMER_CHOICE:
                 initPrimerItemsList();
@@ -866,10 +886,7 @@ public class BrewDescriptionFragment extends Fragment {
                 w = "V = " + Double.toString(brewProcess.getVolumeActual()) + getString(R.string.litr);
                 textProductVolume.setText(w);
 
-                if((db = AreometerAC3.getAlcoholPercent(brewProcess.getBeginningWortTempereture(),
-                        brewProcess.getOriginalWortGravity(), brewProcess.getBottlingWortTemperature(),
-                        brewProcess.getFinalWortGravity(), brewProcess.getCarbonationAlc())) != brewProcess
-                        .getAlcoholContent()){
+                if((db = brewProcess.calcAlcContent(new AreometerAC3())) != brewProcess.getAlcoholContent()){
                     brewProcess.setAlcoholContent(db);
                 }
                 w = "Alc " + Double.toString(db) + getString(R.string.vol_percent);
@@ -1226,7 +1243,6 @@ public class BrewDescriptionFragment extends Fragment {
     private AlertDialog.Builder temperatureDialogBuilder;
     /* Формируем диалог для опр температуры
     Как альтернатива внутреннуму классу для дат использована функция создания диалогов .
-     Позже разбираться в зависимости от API activity/context
      */
     void setTemperatureDialog(int minT, int maxT, int currentT, String sTitle, String sMessage,
             final int positiveDestinaition, final int negativeDestination, final int cancelDestination){
@@ -1300,7 +1316,7 @@ public class BrewDescriptionFragment extends Fragment {
     // на входе текстовые строки сообщений и кнопок
     // todo Может его заглобалить ?
     private void getYesNoAlertDialog(String title, String message,
-        String buttonYes, String buttonNo, boolean cancalAble, DialogInterface.OnClickListener yesNoDialogOnClickListener){
+        String buttonYes, String buttonNo, boolean cancelAble, DialogInterface.OnClickListener yesNoDialogOnClickListener){
         AlertDialog.Builder getYesNoBuilder = new AlertDialog.Builder(contextBDF);
         getYesNoBuilder.setCancelable(false)    // можно сделать параметром, если понадобится
             .setTitle(title)

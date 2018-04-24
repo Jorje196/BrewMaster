@@ -400,8 +400,17 @@ public class BrewProcess {
         this.processStage = num;
         this.processStageTime = time;
     }
+
+    // Вычисляет содержание Alc по параметрам замеса и розлива (Original & Final)
+    // Пока привязка при обращении к AC-3 в BDF, будет несколько измерителей - сделать
+    // выбор , полиморфическая заготовка с Hydrometer позволяет
+    double calcAlcContent(Hydrometer meter){
+        return meter.getAlcoholPercent(getBeginningWortTempereture(),
+            getOriginalWortGravity(), getBottlingWortTemperature(),
+            getFinalWortGravity()) + getCarbonationAlc();
+    }
     // Возвращает изменение содержания Alc в процессе карбонизации
-    double getCarbonationAlc(){
+    private double getCarbonationAlc(){
         double cAlc;
         cAlc = CARBONATION_ALC_MAX;
         calcProcessStageAndTime();
@@ -410,6 +419,7 @@ public class BrewProcess {
                 (getProcessProgressFirst() + getProcessProgressSecond())/ 2 / PROGRESS_MAX );
         }
         double i = cAlc;
+        cAlc = Math.rint(cAlc * 100) / 100;
         return cAlc;
     }
     double alcPercent;      // Содержание алкоголя, %

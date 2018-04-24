@@ -13,7 +13,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarDrawerToggle;
 
 import android.util.Log;
@@ -31,16 +30,10 @@ import jorje196.com.github.brewmaster.MaltExtDescriptionFragment.FragMaltLink;
 import jorje196.com.github.brewmaster.BrewListFragment.BrewListFLink;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 
 
-import static android.view.MenuItem.SHOW_AS_ACTION_ALWAYS;
 import static jorje196.com.github.brewmaster.BrewDescriptionFragment.ARG_CORTEGE_ID;
 import static jorje196.com.github.brewmaster.BrewDescriptionFragment.ARG_SOURCE;
-import static jorje196.com.github.brewmaster.BrewListFragment.BLF_TAG;
 import static jorje196.com.github.brewmaster.BrewListFragment.SQL_BREW_LIST;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW1_STR;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW2_STR;
@@ -82,7 +75,9 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
     static final int MALT_EXT_DESCRIPT_NUM = 2;     // MaltExtDescriptionFragment
     static final int BREW_LIST_FRAG_NUM = 3;        // BrewListFragment
     static final int BREW_DESCRIPT_FRAG_NUM = 4;    // BrewDescriptionFragment
-
+    static final int DRAWER_OPEN_NUM = 33;          // Признак открытой выдвижной панели
+    static final int DRAWER_CLOSE_NUM = 66;         // Признак закрытой выдвижной панели
+    static final int FRAGMENT_IS_ABSENT = 44;       // Нет текущего фрагмента
 
     Context cntMBA;
     /*@org.jetbrains.annotations.Contract(pure = true)
@@ -140,11 +135,24 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
                     R.string.open_drawer, R.string.close_drawer) {
                 @Override   // Вызыв. при переходе drawer в полностью закрытое сост.
                 public void onDrawerClosed (View view) {
+                    int lockMode;
+                    lockMode = (searchCurrentFragment()== BREW_DESCRIPT_FRAG_NUM)?
+                            DrawerLayout.LOCK_MODE_LOCKED_CLOSED : DrawerLayout.LOCK_MODE_UNLOCKED;
+                    drawerLayout.setDrawerLockMode(lockMode);
+
+                    invalidateOptionsMenu();    // Освежаем меню действий
                     super.onDrawerClosed(view);
                     // todo тут свой код
                 }
                 @Override   // Вызыв. при переходе drawer в полностью открытое сост.
                 public void onDrawerOpened (View view) {
+                    int lockMode, currentFragmentNum;
+                    currentFragmentNum = searchCurrentFragment();
+                    lockMode = (currentFragmentNum == BREW_DESCRIPT_FRAG_NUM)?
+                            DrawerLayout.LOCK_MODE_LOCKED_OPEN : DrawerLayout.LOCK_MODE_UNLOCKED;
+                    drawerLayout.setDrawerLockMode(lockMode);
+
+                    invalidateOptionsMenu();    // Освежаем меню действий
                     super.onDrawerOpened(view);
                     // todo свой код
                 }
@@ -155,7 +163,15 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
             // Включение Кн Вверх для использования её объектом drawerToggle
             this.getActionBar().setHomeButtonEnabled(true);
             this.getActionBar().setDisplayHomeAsUpEnabled(true);
-            //this.getActionBar().get
+            // Добавляем слушателя изменения BackStack
+// Добавляем слушателя изменений BackStack для изменения видимости пунктов меню действий
+            getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                @Override
+                public void onBackStackChanged() {
+                    invalidateOptionsMenu();    // для освежения меню
+
+                }
+            });
 
             // Выбираем стартовый фрагмент для фрейма
             if (savedInstanceState == null) {
@@ -192,8 +208,9 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
 
      // Метод определения текущего активного фрагмента, связанного с активностью
     private int searchCurrentFragment() {
-        int fragmentNum = 0;
+        int fragmentNum = 0, i;
         FragmentManager fragMng = getFragmentManager();
+        i = fragMng.getBackStackEntryCount();
         // Фрагмент, в настоящее время связанный с активностью (поиск начинается с активного)
         Fragment fragment = fragMng.findFragmentByTag(TAG_FOR_ALL);
         // ищем , к какому типу относится фраг и возвращаем результат
@@ -205,6 +222,7 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
             fragmentNum = BREW_LIST_FRAG_NUM;
         } else if (fragment instanceof BrewDescriptionFragment)
             fragmentNum = BREW_DESCRIPT_FRAG_NUM;
+        if (fragMng.getBackStackEntryCount() == 0) fragmentNum = FRAGMENT_IS_ABSENT;
         return fragmentNum;
     }
 
@@ -226,10 +244,12 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
     @Override
     public void getDrawerToggle(){
         int i=0, j; j = 1;
+        /* это работает толко для пунктов из xml-файла
+        mainMenuAction.performIdentifierAction(R.id.action_edit, 0); */
+        //MenuItem itemHome = new MenuItemStub(android.R.id.home);
         setIdMaltExtName(-1);
-        MenuItem itemHome = new MenuItemStub(android.R.id.home);
-        onOptionsItemSelected(itemHome);
-
+        //onOptionsItemSelected(itemHome);
+        drawerLayout.openDrawer(drawerList); // открываем выдвижную панель
     }
     @Override
     public String getMaltExtName(){
@@ -242,13 +262,29 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
     @Override
     public int getIdMaltExtName(){
         int res = idMaltExtName;
-        idMaltExtName = -1; // надо ли ?
+        //idMaltExtName = -1;
         return res;
     }
     @Override
     public void getExitFragment(){
         infoToast("Не удалось получить данные из базы");
         onBackPressed();
+    }
+    @Override
+    public void setMenuItemsBDF(){
+
+
+    }
+    // Метод обеспечивает возможность отказать в досупе к управлению выдвижной панели с экрана
+    @Override
+    public void setDrawerDenied(boolean denied){
+        this.getActionBar().setDisplayHomeAsUpEnabled(!denied);
+        // Блок от шаловливых рук
+        int lockMode;
+        lockMode = (denied)?
+                DrawerLayout.LOCK_MODE_LOCKED_CLOSED : DrawerLayout.LOCK_MODE_UNLOCKED;
+        //setIdMaltExtName(-3);
+        drawerLayout.setDrawerLockMode(lockMode);
     }
 
     /* Реализация (абстрактного) метода связи getFBLL (BrewListFra...) с родительской активностью */
@@ -344,14 +380,14 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
             startFragment(fragment, TAG_FOR_ALL);
         } else {
             int _id; _id = (int)id;
-            setIdMaltExtName(_id);
             setMaltExtName(getMaltExtNameById(_id));
             setMaltAvailableBrands(getAvailableMaltBrandsByNameId(_id));
+            setIdMaltExtName(_id);
         }
         drawerLayout.closeDrawer(drawerList); // пункт выбран => закрываем выдвижную панель
 
     }
-    //  Метод выполняет стандартные шаги подготовки фраг. описания Malt
+    //  Метод выполняет стандартные шаги подготовки фрагмента описания Malt
     void  prepareMaltFragment(Fragment fragment, int id, SQLiteDatabase db) {
         ArrayList<String> stringId;
         stringId = DbContract.DbVerieties.getVerietyIdByNameId(db, id);
@@ -360,7 +396,7 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
 
         // подготовка информации для передачи новому создаваемому фрагменту Malt
         Bundle argBundle = prepareMaltInfo(db, verietyId );
-        putPropetiesToFMalt(argBundle);
+        putPropertiesToFMalt(argBundle);
         fragment.setArguments(argBundle);
     }
     //  Метод выполняет стандартные шаги по активации фрагмента до ft.commit() включительно
@@ -430,7 +466,7 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
     }
 
     // Прикрепляет к заданному Bundle параметры экземпляра
-    void putPropetiesToFMalt(Bundle argBundle) {
+    void putPropertiesToFMalt(Bundle argBundle) {
         argBundle.putInt(ARG_ID, getChoosedId());
         argBundle.putInt(ARG_SIZE, getNumVerietiesInList());
         argBundle.putInt(ARG_POSITION,getCurrentPositionInList());
@@ -448,26 +484,37 @@ public void maltChoiseInBrewDescription(View view) {
 //**************************************************************
     //для отображения меню на панели действий реализуем метод onCreateOptionsMenu()
     // элементы действий берем из файла ресурсов xml
+    private Menu mainMenuAction;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_of_actions, menu);
-
-        /* Блок добавлен для устранения непонятности с применением support v7, и
-          принудительно устанавливает видимость иконок на ActionBar. Возможно дело
-          в неустоявшейся версии библиотеки поддержки , стоит проверять с обновлениями,
-          нестыковка может пропасть . Пенка в восприятии пространств имен app / android */
-        int i = menu.size();  // отладочное
-        MenuItem n = menu.findItem(R.id.action_brew_list);
-        n.setShowAsAction(SHOW_AS_ACTION_ALWAYS);
-        n = menu.findItem(R.id.action_create_brew);
-        n.setShowAsAction(SHOW_AS_ACTION_ALWAYS);
-        i++;     // отладочное
+        mainMenuAction = menu;
 
         /* С ShareActionProvider та же проблема с пространствами имен.
          Пока в xml убрал app вернул android . Если само не пройдет, решать аналогично */
-
         return    super.onCreateOptionsMenu(menu);
     }
+    // Вызывается при каждом вызове invalidateOptionsMenu()
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (drawerLayout.isDrawerOpen(drawerList)) {
+            ActionsMenuManager.menuItemVisibility(menu, DRAWER_OPEN_NUM);
+            ActionsMenuManager.titleDefine(getActionBar(), DRAWER_OPEN_NUM);
+        } else {
+            ActionsMenuManager.menuItemVisibility(menu, DRAWER_CLOSE_NUM);
+
+            int currentFragment = searchCurrentFragment();
+            if (!ActionsMenuManager.menuItemEnabled(menu, currentFragment)) {
+            //   infoToast("Для данного фрагмента нет видимости"); // отладка
+            }
+            if (!ActionsMenuManager.menuItemShowAs(menu, currentFragment)) {
+                //   infoToast("Для данного фрагмента нет Show"); // отладка
+            }
+            ActionsMenuManager.titleDefine(getActionBar(), currentFragment);
+            }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     // Метод создает интент и передает его провайдеру действия (для action_share)
     private void setIntent(String text){
         Intent intent = new Intent(Intent.ACTION_SEND); // todo корректировать, пусть возвращает интент
@@ -476,20 +523,20 @@ public void maltChoiseInBrewDescription(View view) {
         shareActionProvider.setShareIntent(intent);
     }
 
-    // выполняется когда выбирается элемент на панели действий, получает объект MenuItem
+    // Выполняется когда выбирается элемент на панели действий, получает объект MenuItem
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Чтобы объект ActionBarDrawerToggle реагировал на выбор (клики, щелчки ..)
 // drawerToggle.
         if (drawerToggle != null && drawerToggle.onOptionsItemSelected(item)) return true;
-        //i++;
+       // i++;
         switch (item.getItemId()) {
             case R.id.action_search:
                 return true;
             case R.id.action_brew_list:
                 // Формируем и отоббражаем фрагмент оо списком варок
                 BrewListFragment brewListFragment= new BrewListFragment();
-                startFragment(brewListFragment, BLF_TAG);
+                startFragment(brewListFragment, TAG_FOR_ALL);
 
                 return true;
 

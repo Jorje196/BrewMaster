@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">BrewMaster</string>
     <string name="activity_main_name">Пивовар</string>
+    <string name="title_brew_list">Список варок</string>
+    <string name="title_brew_description">"   Процесс варки"</string>
+    <string name="title_malt_description">"  Об экстракте"</string>
+    <string name="title_drawer_on">Выбираем экстракт</string>
 
     <string name="action_settings">Настройки</string>
     <string name="action_saving">Сохранить</string>
@@ -81,6 +85,11 @@
     <!-- для выдвижной панели -->
     <string name="open_drawer">Open drawer</string>
     <string name="close_drawer">Close drawer</string>
+
+    <!-- заголовки для фрагментов и условий -->
+    <string-array name="titles_action_bar">
+        <item></item>
+    </string-array>
 
     <!-- строковые константы -->
     <string name="grad_C">"\u2103"</string>
