@@ -34,6 +34,7 @@
     <string name="button_extract_choice">Выбор экстракта</string>
     <string name="button_primer_choice">Выбор праймера</string>
     <string name="malt_extract_name">Выбор экстракта тут</string>
+
     <string name="title_malt_extract_brand">"         ВЫБОР БРЕНДА"</string>
     <string name="alert_malt_extract_brand">"  Доступных вариантов НЕТ !"</string>
     <string name="name_output_prefix">СЭ" "</string>

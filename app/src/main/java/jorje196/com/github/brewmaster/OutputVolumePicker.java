@@ -82,12 +82,12 @@ class OutputVolumePicker extends AlertDialog{
                 context.getString(R.string.title_brew_result),
                 context.getString(R.string.msg_brew_result));
     }
-    OutputVolumePicker(Context context, double[] sizeList,  double nominalVolume,
-        double actualVolume, DialogInterface.OnClickListener buttonPositiveListenerOUP,
-                       DialogInterface.OnClickListener buttonNegativeListenerOUP,
-                       DialogInterface.OnCancelListener cancelListenerOUP,
-                       CharSequence buttonPositive, CharSequence buttonNegative,
-                       CharSequence title, CharSequence msg){
+    OutputVolumePicker(Context context, double[] sizeList, double nominalVolume,
+            double actualVolume, DialogInterface.OnClickListener buttonPositiveListenerOUP,
+            DialogInterface.OnClickListener buttonNegativeListenerOUP,
+            DialogInterface.OnCancelListener cancelListenerOUP,
+            CharSequence buttonPositive, CharSequence buttonNegative,
+            CharSequence title, CharSequence msg){
         super(context);
         setSizeList(sizeList);
         int _length = sizeList.length;
@@ -137,10 +137,13 @@ class OutputVolumePicker extends AlertDialog{
                     j = 1; i = 0;
                 }
                 quantityList[j] = newVal;
-                calcAndShow();
+
                 if (quantityList[i] == ZERO){
                     numberPicker[i].setValue((int)Math.ceil(nMax( i, j, newVal)/CONST_MAX));
+
+                    quantityList[i] = numberPicker[i].getValue();
                 }
+                calcAndShow();
             }
         };
         CharSequence s;

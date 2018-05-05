@@ -43,6 +43,8 @@ public class BrewProcess {
     void setIdNameMaltExt(int idNameMaltExt) {
         this.idNameMaltExt = idNameMaltExt;
     }
+    private int idBrandMaltExt;
+
 
     //
     private double weightMaltExt;               // Количество экстракта, кг
@@ -240,6 +242,7 @@ public class BrewProcess {
     void setOriginalWortGravity(double originalWortGravity) {
         this.originalWortGravity = originalWortGravity;
     }
+    //Константы, общие для всех варок
     private double finalWortGravity;
     double getFinalWortGravity() {
         return finalWortGravity;
@@ -259,12 +262,10 @@ public class BrewProcess {
     double getMinFinalWortGravity() {
         return MIN_FINAL_WORT_GRAVITY;
     }
-
     final private double MAX_FINAL_WORT_GRAVITY = 5;
     double getMaxFinalWortGravity() {
         return MAX_FINAL_WORT_GRAVITY;
     }
-
     final private double STEP_WORT_GRAVITY = 0.5;
     double getStepWortGravity(){
         return STEP_WORT_GRAVITY;
