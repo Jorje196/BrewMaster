@@ -28,6 +28,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 import jorje196.com.github.brewmaster.MaltExtDescriptionFragment.FragMaltLink;
 import jorje196.com.github.brewmaster.BrewListFragment.BrewListFLink;
+import jorje196.com.github.brewmaster.BrewDescriptionFragment.BrewDescriptionFLink;
 
 import java.util.ArrayList;
 
@@ -69,7 +70,7 @@ import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_VOLU
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_WEIGHT;
 
 
-public class MainBeerActivity extends Activity implements FragMaltLink, BrewListFLink, BrewDescriptionFragment.BrewDescriptionFLink {
+public class MainBeerActivity extends Activity implements FragMaltLink, BrewListFLink, BrewDescriptionFLink {
     static final String TAG_FOR_ALL = "visible_fragment";
     static final int TOP_FRAG_NUM = 1;              // TopFragment
     static final int MALT_EXT_DESCRIPT_NUM = 2;     // MaltExtDescriptionFragment
@@ -270,11 +271,8 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
         infoToast("Не удалось получить данные из базы");
         onBackPressed();
     }
-    @Override
-    public void setMenuItemsBDF(){
 
 
-    }
     // Метод обеспечивает возможность отказать в досупе к управлению выдвижной панели с экрана
     @Override
     public void setDrawerDenied(boolean denied){
@@ -287,9 +285,9 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
         drawerLayout.setDrawerLockMode(lockMode);
     }
 
-    /* Реализация (абстрактного) метода связи getFBLL (BrewListFra...) с родительской активностью */
+    /* Реализация методов интерфейса с BrewListFragment */
     @Override
-    public void getFBLL(ListFragment fragment, String tag) {
+    public void getFBLL(ListFragment fragment) {
         if(cursorBL==null) {
             // TODO Выбор правил сортировки, нужен ли ?
 
@@ -333,6 +331,11 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
 
         fragment.setListAdapter(adapterBL);
 
+    }
+
+    @Override
+    public void openBrewDetailing(int brewId){
+        openBrewDescriptionFragment(SOURCE_BFL, brewId);
     }
 
     /* Реализация метода связи фрагмента MaltExt... с родительской активностью
@@ -542,13 +545,14 @@ public void maltChoiseInBrewDescription(View view) {
 
             case R.id.action_create_brew:
                 // Начинаем новую варку
-                BrewDescriptionFragment brewDescriptionFragment = new BrewDescriptionFragment();
+                openBrewDescriptionFragment(SOURCE_NEW, NULL_ID);
 
+            /*    BrewDescriptionFragment brewDescriptionFragment = new BrewDescriptionFragment();
                 Bundle bundleBDF = new Bundle();
                 bundleBDF.putInt(ARG_SOURCE, 0);
                 bundleBDF.putInt(ARG_CORTEGE_ID, 0);
                 brewDescriptionFragment.setArguments(bundleBDF);
-                startFragment(brewDescriptionFragment, TAG_FOR_ALL);
+                startFragment(brewDescriptionFragment, TAG_FOR_ALL); */
 
                 return true;
             case R.id.action_share:
@@ -568,6 +572,22 @@ public void maltChoiseInBrewDescription(View view) {
 
         }
     }
+
+    // Процедура создания фрагмента варки
+    // Параметры : вызывающий источник и id в соответствующей таблице
+                                        // Источники вызова фрагмента варки:
+    final int SOURCE_NEW = 0;       //   меню действий
+    final int SOURCE_BFL = 1;       //   BrewListFragment
+    final int NULL_ID = 0;          // Просто 0 для заполнения параметра id
+    void openBrewDescriptionFragment(int source, int id){
+        BrewDescriptionFragment brewDescriptionFragment = new BrewDescriptionFragment();
+        Bundle bundleBDF = new Bundle();
+        bundleBDF.putInt(ARG_SOURCE, source);
+        bundleBDF.putInt(ARG_CORTEGE_ID, id);
+        brewDescriptionFragment.setArguments(bundleBDF);
+        startFragment(brewDescriptionFragment, TAG_FOR_ALL);
+    }
+
     @Override
     public void onDestroy (){
         super.onDestroy();

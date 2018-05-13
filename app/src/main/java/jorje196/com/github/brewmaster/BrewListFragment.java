@@ -111,7 +111,8 @@ public  class BrewListFragment extends ListFragment {
 
     // Интерфейс для связи (передачи информации в родительскую активность
     interface BrewListFLink {
-        void getFBLL(ListFragment fragment, String tag);
+        void getFBLL(ListFragment fragment);
+        void openBrewDetailing(int brewId);
     }
 
     BrewListFLink brewListFLink;
@@ -130,9 +131,7 @@ public  class BrewListFragment extends ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        brewListFLink.getFBLL(this, BLF_TAG);
-        // TODO Для исключения утечки памяти надо открывать и закрывать курсоры для адаптера в callback'ах по onActivityCreate и ? onDesrtoy ?
-
+        brewListFLink.getFBLL(this);
     }
 
     /* Чтобы отображался не layout по умолчанию, а определенный в fragment_brew_list.xml
@@ -146,8 +145,8 @@ public  class BrewListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView listView, View itemView, int position, long id) {    //Что-то происходит }
         super.onListItemClick(listView, itemView, position, id);
+        brewListFLink.openBrewDetailing((int)id);
         int i = 0;
         i++;
-        position++;
     }
 }

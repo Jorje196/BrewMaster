@@ -149,7 +149,6 @@ public class BrewDescriptionFragment extends Fragment {
         ArrayList[] getMaltExtBrands();
         int getIdMaltExtName();
         void getExitFragment();
-        void setMenuItemsBDF();
         void setDrawerDenied(boolean allowed);
     }
     BrewDescriptionFLink brewDescriptionFLink;
