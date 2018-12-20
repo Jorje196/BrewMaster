@@ -56,7 +56,7 @@ public class BrewProcess {
     public int getBitterMaltExt() {
         return bitterMaltExt;
     }
-    private void setBitterMaltExt(int bitterMaltExt) {
+    void setBitterMaltExt(int bitterMaltExt) {
         this.bitterMaltExt = bitterMaltExt;
     }
     private int colorMaltExt;
@@ -250,10 +250,9 @@ public class BrewProcess {
     void setFinalWortGravity(double finalWortGravity) {
         this.finalWortGravity = finalWortGravity;
     }
+
     final private double MIN_ORIGINAL_WORT_GRAVITY = 7;
-    double getMinOriginalWortGravity() {
-        return MIN_ORIGINAL_WORT_GRAVITY;
-    }
+    double getMinOriginalWortGravity() { return MIN_ORIGINAL_WORT_GRAVITY; }
     final private double MAX_ORIGINAL_WORT_GRAVITY = 15;
     double getMaxOriginalWortGravity(){
         return MAX_ORIGINAL_WORT_GRAVITY;
@@ -456,7 +455,7 @@ public class BrewProcess {
         this.volumeRecomend = 23;           //setVolumeRecomend(23);
         this.volumeActual = 0;              //setVolumeActual(0);
         this.alcoholContent = 0;            //setAlcoholContent(0);
-        this.bitterMaltExt = 825;           //setBitterMaltExt(825);
+        this.bitterMaltExt = 0;           //setBitterMaltExt(825);
         this.colorMaltExt = 55;             //setColorMaltExt(0);
 
         this.processStage = 0;

@@ -14,7 +14,7 @@ import static jorje196.com.github.brewmaster.MainBeerActivity.FRAGMENT_IS_ABSENT
 import static jorje196.com.github.brewmaster.MainBeerActivity.MALT_EXT_DESCRIPT_NUM;
 import static jorje196.com.github.brewmaster.MainBeerActivity.TOP_FRAG_NUM;
 /*
-* Класс обеспечивает управление видимостью, оступностью, отображением и т.д.
+* Класс обеспечивает управление видимостью, доступностью, отображением и т.д.
 * Меню действий для задаваемого номера фрагмента или условия. В данном конкретном
 * случае условие бывает только одно - положение выдвижной панели. Для общего случая
 * можно строить таблицы состояния пунктов меню для каждого фрагмента в зависимости

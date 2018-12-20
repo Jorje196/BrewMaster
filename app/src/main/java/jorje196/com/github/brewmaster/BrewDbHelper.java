@@ -93,27 +93,27 @@ class BrewDbHelper extends SQLiteOpenHelper {
             DbContract.DbVerieties.insertVerieties(db, "Draught", "Coopers",    //1
                     420, 130, 1, "draught_small",
                     "http://store.coopers.com.au/draught-1-7kg.html",
-                    "Светлое слабо горькое , скорее летнее, рыба, белая птица");
+                    "Светлое слабо горькое , скорее летнее, рыба, птица");
             DbContract.DbVerieties.insertVerieties(db, "Draught", "Muntons",    //2
                     420, 130, 2, "draught_small",
                     "http://store.coopers.com.au/draught-1-7kg.html",
-                    "Светлое слабо горькое , скорее летнее, рыба, белая птица");
+                    "Светлое слабо горькое , скорее летнее, рыба, птица");
             DbContract.DbVerieties.insertVerieties(db, "Draught", "Finlandia",  //3
                     420, 130, 3, "draught_small",
                     "http://store.coopers.com.au/draught-1-7kg.html",
-                    "Светлое слабо горькое , скорее летнее, рыба, белая птица");
+                    "Светлое слабо горькое , скорее летнее, рыба, птица");
             DbContract.DbVerieties.insertVerieties(db, "Lager", "Coopers",      //4
                     390, 75, 1, "lager_small",
                     "http://store.coopers.com.au/lager-1-7kg.html",
-                    "Очень светлое слабо горькое , летнее, рыба, белая птица");
+                    "Очень светлое слабо горькое , лёгкое летнее, белое мясо рыбы или птицы");
             DbContract.DbVerieties.insertVerieties(db, "English Bitter", "Coopers", //5
                     620, 420, 1, "english_bitter_small",
                     "http://store.coopers.com.au/english-bitter-1-7kg.html",
-                    "Горькое, универсальное по сезону, ближе к мясу с соответствующими соусами и гарниром");
+                    "Горькое, универсальное по сезону, ближе к мясу с соответствующими соусами ");
             DbContract.DbVerieties.insertVerieties(db, "Real Ale", "Coopers",       //6
                     560, 230, 1, "real_ale_small",
                     "http://store.coopers.com.au/real-ale-1-7kg.html",
-                    "Среднее горьковатое , универсальное по сезону, мясо, птица");
+                    "Среднее по горечи , универсальное по сезону, мясо, водоплавающая птица");
             DbContract.DbVerieties.insertVerieties(db, "Dark Ale", "Coopers",       //7
                     590, 650, 1, "dark_ale_small",
                     "http://store.coopers.com.au/dark-ale.html",

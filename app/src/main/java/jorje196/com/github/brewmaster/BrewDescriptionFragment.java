@@ -150,6 +150,11 @@ public class BrewDescriptionFragment extends Fragment {
         int getIdMaltExtName();
         void getExitFragment();
         void setDrawerDenied(boolean allowed);
+        // !!! Из-за усечения функционала  делаем так
+        //int getIdMaltExtBrand(String maltExtBrand);
+        int getMaltExtBitter(String maltExtName, String maltExtBrand);
+        //double getMaltExtCanWeight(int idMaltExtName, int idMaltExtBrand);
+        //int getMaltExtVolumeRec(int idMaltExtName, int idMaltExtBrand);  // факультативно
     }
     BrewDescriptionFLink brewDescriptionFLink;
     // Переопределяем обработку пунктов меню ActionBar
@@ -272,7 +277,7 @@ public class BrewDescriptionFragment extends Fragment {
         Bundle argsBundle = getArguments();
         setCallSource(argsBundle.getInt(ARG_SOURCE));
         setCortegeId(argsBundle.getInt(ARG_CORTEGE_ID));
-            // или для отладки
+            // Для отладки ( или при отсутствии альтернативных источников)
         setCallSource(0);
         setCortegeId(0);
         currentDateAndTime.setTimeInMillis(0);  // уст. текущего календаря в 0
@@ -280,13 +285,13 @@ public class BrewDescriptionFragment extends Fragment {
         Date d = currentDateAndTime.getTime();
 
         // Создаем экземпляр класса BrewProcess, с которым будем работать
-        if(brewProcess == null) {
+        if(brewProcess == null)
             if (getCortegeId() == 0)
                 brewProcess = new BrewProcess();
             else if (getCallSource() == 0)
                 brewProcess = new BrewProcess(getCortegeId());
             else brewProcess = new BrewProcess(getCortegeId(), getCallSource());
-        }
+
         //Activity a = getActivity(); // справочно
         if (layoutBDF == null)
             layoutBDF = inflater.inflate(R.layout.fragment_brew, container, false);
@@ -413,11 +418,16 @@ public class BrewDescriptionFragment extends Fragment {
                 currentBrandName = availableBrandName[0].get(numberInList).toString();
                 maltNameChoosed = (TextView) layoutBDF.findViewById(R.id.malt_name_choosed);
                 currentCanWeight = brewProcess.getWeightMaltExtCan();
+                // todo Здесь определять Bitter
                 maltNameChoosed.setText(formatMaltAndBrandOutput(currentMaltName, currentBrandName, currentCanWeight));
                 maltNameChoosed.setVisibility(View.VISIBLE);
                 // Сохраняем полученные данные в экземпляре варки
                 brewProcess.setNameMaltExt(currentMaltName);
                 brewProcess.setBrandMaltExt(currentBrandName);
+                // см. коммент в main
+                brewProcess.setBitterMaltExt(brewDescriptionFLink.getMaltExtBitter(currentMaltName, currentBrandName));
+                // TODO здесь вписать горечь и вес и объем
+
                 modeEditIngredients = false;
                 // todo туда же и ID
                 brewProcess.setWeightMaltExt(currentCanWeight);     // todo это делать из базы

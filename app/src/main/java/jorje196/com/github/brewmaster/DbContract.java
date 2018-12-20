@@ -171,7 +171,7 @@ public final class DbContract {
         // Получение кортежа из таблицы Cans по заданному Id
         public static ContentValues getCanCortegeById (SQLiteDatabase db, String Id){
             return getSelectColumnsByFilter(db, TABLE_CANS,
-            null, COLUMN_CANS_ID + " = ?", new String[] {Id}, null) .get(0);
+            null, COLUMN_CANS_ID + " = ?", new String[] {Id}, null, null) .get(0);
         }
     }
 
@@ -363,7 +363,7 @@ public final class DbContract {
         public static ContentValues getVerietyCortegeById (SQLiteDatabase db, String Id) {
 
         return getSelectColumnsByFilter(db, TABLE_VERIETIES,
-            null, COLUMN_VERIETIES_ID + " = ?", new String[] {Id}, null) .get(0);
+            null, COLUMN_VERIETIES_ID + " = ?", new String[] {Id}, null, null) .get(0);
         }
 
         // Получение всех колонок кроме ссылки на img для всех Coopers, чей bitter = [bitterMin...bitterMax]
@@ -376,7 +376,7 @@ public final class DbContract {
         // либо как вариант            COLUMN_VERIETIES_BITTER + ">=? AND " + COLUMN_VERIETIES_BITTER + " <=?";
             String orderedBy = COLUMN_VERIETIES_BITTER + " ASC";
             String[] argsInFilter = {Integer.toString(DbBrands.getBrandId(db,brand)), Integer.toString(bitterMin), Integer.toString(bitterMax)};
-            resultCV = getSelectColumnsByFilter(db, TABLE_VERIETIES, columnLF, columnsInFltr, argsInFilter, orderedBy);
+            resultCV = getSelectColumnsByFilter(db, TABLE_VERIETIES, columnLF, columnsInFltr, argsInFilter, orderedBy, null);
             ArrayList<String> result = new ArrayList<>();
             for (int i = 0; i < resultCV.size(); i++) {
                 StringBuffer cicleW = new StringBuffer(BUFFER_STRING_SIZE);
@@ -429,8 +429,9 @@ public final class DbContract {
 
     // Получение выбранных колонок заданной таблицы , удовлетворяющих условиям, определенным
     // в запросе, с сохранением "родных" колонкам типов
-    private static ArrayList<ContentValues> getSelectColumnsByFilter(SQLiteDatabase db,
-        String tableName, String[] columnsLF, String columnsInFilter, String[] argsInFilter, String orderedBy) {
+
+    static ArrayList<ContentValues> getSelectColumnsByFilter(SQLiteDatabase db,
+        String tableName, String[] columnsLF, String columnsInFilter, String[] argsInFilter, String orderedBy, String limit) {
         Cursor cursor = db.query(tableName, columnsLF, columnsInFilter, argsInFilter, null, null, orderedBy);
         ArrayList<ContentValues> result = new ArrayList<>();
         int columnNum ;

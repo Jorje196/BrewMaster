@@ -40,15 +40,12 @@ import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW1_STR;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW2_STR;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW3_STR;
 import static jorje196.com.github.brewmaster.BrewListFragment.TEXT_VIEW4_STR;
-import static jorje196.com.github.brewmaster.DbContract.DbBrands.getBrand;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_VOLUME;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.COLUMN_CANS_WEIGHT;
 import static jorje196.com.github.brewmaster.DbContract.DbCans.getCanCortegeById;
-import static jorje196.com.github.brewmaster.DbContract.DbCans.getCanWeight;
 import static jorje196.com.github.brewmaster.DbContract.DbNames.COLUMN_NAMES_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbNames.COLUMN_NAMES_NAME;
 import static jorje196.com.github.brewmaster.DbContract.DbNames.TABLE_NAMES;
-import static jorje196.com.github.brewmaster.DbContract.DbNames.getName;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_BITTER;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_BRAND_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_CAN_ID;
@@ -56,7 +53,7 @@ import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIE
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_DESCRIPTION;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_NAME_ID;
 import static jorje196.com.github.brewmaster.DbContract.DbVerieties.COLUMN_VERIETIES_SRCIMG;
-import static jorje196.com.github.brewmaster.DbContract.DbVerieties.getVerietyCortegeById;
+import static jorje196.com.github.brewmaster.DbContract.DbVerieties.TABLE_VERIETIES;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_BITTER;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_BRAND;
 import static jorje196.com.github.brewmaster.MaltExtDescriptionFragment.ARG_COLOR;
@@ -170,6 +167,10 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
                 @Override
                 public void onBackStackChanged() {
                     invalidateOptionsMenu();    // для освежения меню
+                    int i=0;
+                    i = getFragmentManager().getBackStackEntryCount();
+                    if (i==0) finish();  // !!!
+// Завершение работы, при случае добавить иероглифы прощания, не забыть отключить слушателей
 
                 }
             });
@@ -265,6 +266,22 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
         int res = idMaltExtName;
         //idMaltExtName = -1;
         return res;
+    }
+    // fix 14.11 As is , because progect interrupted
+    @Override
+    public int getMaltExtBitter(String currentMaltName, String currentBrandName){
+        int bitter=0;
+        ArrayList<ContentValues> cortegeVer;
+        String[] columnLF = {COLUMN_VERIETIES_BITTER, COLUMN_VERIETIES_COLOR,
+            COLUMN_VERIETIES_CAN_ID};
+        String columnsInFltr = COLUMN_VERIETIES_BRAND_ID + "=?  AND " +
+            COLUMN_VERIETIES_NAME_ID + "=?";
+        String[] argsInFilter = {Integer.toString(DbContract.DbBrands.getBrandId(brewDb, currentBrandName)),
+            Integer.toString(DbContract.DbNames.getNameId(brewDb, currentMaltName))};
+        cortegeVer = DbContract.getSelectColumnsByFilter(brewDb, TABLE_VERIETIES, columnLF,
+            columnsInFltr, argsInFilter, null, null);
+        bitter = cortegeVer.get(0).getAsInteger(COLUMN_VERIETIES_BITTER);  // остальное не берем
+    return bitter;
     }
     @Override
     public void getExitFragment(){
@@ -426,7 +443,8 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
         String _str;
         listNameBrands = DbContract.DbVerieties.getVerietyIdByNameId(brewDb, id);
         for (int i = 0; i < listNameBrands.size(); i++) {
-            _str = (DbContract.DbVerieties.getVerietyCortegeById(brewDb, listNameBrands.get(i)).getAsString(DbContract.DbVerieties.COLUMN_VERIETIES_BRAND_ID));
+            _str = (DbContract.DbVerieties.getVerietyCortegeById(brewDb,
+                listNameBrands.get(i)).getAsString(DbContract.DbVerieties.COLUMN_VERIETIES_BRAND_ID));
             listIdBrands.add(i, _str);
             listNameBrands.set(i, DbContract.DbBrands.getBrand(brewDb, _str));
         }
@@ -451,9 +469,11 @@ public class MainBeerActivity extends Activity implements FragMaltLink, BrewList
     Обрабатывает её и готовит пакет к передаче . Можно и ArrayList, но читаемость ухудшается */
     Bundle prepareMaltInfo(SQLiteDatabase db, String VerietyId) {
         Bundle resultBundle = new Bundle();
-        ContentValues cortegeCV = getVerietyCortegeById(db, VerietyId);
-        resultBundle.putString(ARG_NAME, getName(db, cortegeCV.getAsInteger(COLUMN_VERIETIES_NAME_ID)));
-        resultBundle.putString(ARG_BRAND, getBrand(db, cortegeCV.getAsInteger(COLUMN_VERIETIES_BRAND_ID)));
+        ContentValues cortegeCV = DbContract.DbVerieties.getVerietyCortegeById(db, VerietyId);
+        resultBundle.putString(ARG_NAME,
+            DbContract.DbNames.getName(db, cortegeCV.getAsInteger(COLUMN_VERIETIES_NAME_ID)));
+        resultBundle.putString(ARG_BRAND,
+            DbContract.DbBrands.getBrand(db, cortegeCV.getAsInteger(COLUMN_VERIETIES_BRAND_ID)));
         resultBundle.putString(ARG_SRCIMG, cortegeCV.getAsString(COLUMN_VERIETIES_SRCIMG));
         resultBundle.putString(ARG_DESCRIPT, cortegeCV.getAsString(COLUMN_VERIETIES_DESCRIPTION));
         resultBundle.putInt(ARG_BITTER, cortegeCV.getAsInteger(COLUMN_VERIETIES_BITTER));

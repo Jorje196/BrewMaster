@@ -35,7 +35,6 @@
     <string name="button_primer_choice">Primer choice</string>
     <string name="malt_extract_name">Choice malt here</string>
 
-
     <string name="title_malt_extract_brand">"         BRAND CHOICE"</string>
     <string name="alert_malt_extract_brand">"  NO available options !"</string>
     <string name="name_output_prefix">ME" "</string>
@@ -63,19 +62,38 @@
     <string name="fermentation_progress_bar_msg2">Ещё не прокисло ?</string>
     <string name="default_bottled_time">21</string>
     <string name="char_hour">h</string>
-
+    <string name="char_gramm">y</string>
     <string name="title_wort_temperature">"   "WORT TEMPERRATURE</string>
     <string name="title_ambient_temperature">AMBIENT TEMPERATURE</string>
+    <string name="title_brew_result">"  РЕЗУЛЬТАТЫ ТРУДОВ"</string>
+    <string name="msg_brew_result">"Количество бутылок        Объём "</string>
     <string name="prompt_value_choice">Choose value</string>
     <string name="dialog_positive_button_save">SAVE</string>
+    <string name="dialog_positive_button_ok">ОК</string>
     <string name="dialog_negative_button_cancel">CANCEL</string>
+    <string name="dialog_negative_button_backstep">НАЗАД</string>
     <string name="dialog_neutral_button">SKIP</string>
+    <string name="dialog_edit_button">РЕДАКТИРОВАТЬ</string>
     <string name="areometr_info">"  "AC-3"\n  mp,%</string>
     <string name="title_wort_density">"   "WORT DENSITY</string>
+    <string name="heading_bottling">B O T T L I N G</string>
+    <string name="heading_product">P R O D U C T</string>
+    <string name="heading_carbonation">C A R B O N A T I O N</string>
+    <string name="heading_conditioning">C O N D I T I O N I N G</string>
+    <string name="heading_maturation">M A T U R A T I O N</string>
 
     <!-- для выдвижной панели -->
     <string name="open_drawer">Open drawer</string>
     <string name="close_drawer">Close drawer</string>
 
+
+
+
+
+
+    <!-- строковые константы -->
+    <string name="grad_C">"\u2103"</string>
+    <string name="litr">" l"</string>
+    <string name="vol_percent">" %vol</string>
 
 </resources>
